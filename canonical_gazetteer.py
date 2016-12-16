@@ -12,18 +12,21 @@ import time
 import optparse
 import logging
 
-optp = optparse.OptionParser()
-optp.add_option('-v', '--verbose', dest='verbose', action='count',
-                help='Increase verbosity (specify multiple times for more)'
-                )
-(opts, args) = optp.parse_args()
-log_level = logging.WARNING
-if opts.verbose:
-    if opts.verbose == 1:
-        log_level = logging.INFO
-    elif opts.verbose >= 2:
-        log_level = logging.DEBUG
-logging.getLogger().setLevel(log_level)
+
+def set_logging_level():
+    optp = optparse.OptionParser()
+    optp.add_option(
+        '-v', '--verbose', dest='verbose', action='count',
+        help='Increase verbosity (specify multiple times for more)'
+    )
+    (opts, args) = optp.parse_args()
+    log_level = logging.WARNING
+    if opts.verbose:
+        if opts.verbose == 1:
+            log_level = logging.INFO
+        elif opts.verbose >= 2:
+            log_level = logging.DEBUG
+    logging.getLogger().setLevel(log_level)
 
 
 def canonicalImport(filename):
@@ -54,7 +57,6 @@ def evaluateDuplicates(found_dupes, true_dupes):
     print(len(true_positives) / float(len(true_dupes)))
 
 
-settings_file = 'canonical_data_matching_learned_settings'
 training_file = 'training.json'
 
 data_1, header = canonicalImport('restaurant-1.csv')
@@ -79,35 +81,30 @@ t0 = time.time()
 
 print('number of known duplicate pairs', len(duplicates_s))
 
-if os.path.exists(settings_file):
-    with open(settings_file, 'r') as f:
-        gazetteer = dedupe.StaticGazetteer(f)
-else:
-    fields = [{'field': 'name', 'type': 'String'},
-              {'field': 'address', 'type': 'String'},
-              {'field': 'cuisine', 'type': 'String'},
-              {'field': 'city', 'type': 'String'}
-              ]
+fields = [{'field': 'name', 'type': 'String'},
+          {'field': 'address', 'type': 'String'},
+          {'field': 'cuisine', 'type': 'String'},
+          {'field': 'city', 'type': 'String'}
+          ]
 
-    gazetteer = dedupe.Gazetteer(fields)
-    gazetteer.sample(data_1, data_2, 10000)
+gazetteer = dedupe.Gazetteer(fields)
+gazetteer.sample(data_1, data_2, 10000)
 
-    # The test code used known pairs to train:
-    # gazetteer.markPairs(training_pairs)
-    # Let's train manually at the console:
-    dedupe.consoleLabel(gazetteer)
+# The test code used known pairs to train:
+# gazetteer.markPairs(training_pairs)
+# Let's train manually at the console:
+if os.path.exists(training_file):
+    with open(training_file, 'r') as tf:
+        gazetteer.readTraining(tf)
+dedupe.consoleLabel(gazetteer)
+# Save the manual entries in case we need them later
+with open(training_file, 'w') as tf:
+    gazetteer.writeTraining(tf)
 
-    # Save the manual entries in case we need them later
-    with open(training_file, 'w') as tf:
-        gazetteer.writeTraining(tf)
-
-    gazetteer.train()
+gazetteer.train()
 
 if not gazetteer.blocked_records:
     gazetteer.index(data_2)
-
-with open(settings_file, 'wb') as f:
-    gazetteer.writeSettings(f, index=True)
 
 alpha = gazetteer.threshold(data_1)
 
