@@ -25,8 +25,6 @@ if opts.verbose:
         log_level = logging.DEBUG
 logging.getLogger().setLevel(log_level)
 
-# create a random set of training pairs based on known duplicates
-
 
 def canonicalImport(filename):
     preProcess = exampleIO.preProcess
@@ -57,10 +55,12 @@ def evaluateDuplicates(found_dupes, true_dupes):
 
 
 settings_file = 'canonical_data_matching_learned_settings'
+training_file = 'training.json'
 
 data_1, header = canonicalImport('restaurant-1.csv')
 data_2, _ = canonicalImport('restaurant-2.csv')
 
+# create a random set of training pairs based on known duplicates
 training_pairs = dedupe.trainingDataLink(data_1, data_2, 'unique_id', 5000)
 
 all_data = data_1.copy()
@@ -80,8 +80,7 @@ t0 = time.time()
 print('number of known duplicate pairs', len(duplicates_s))
 
 if os.path.exists(settings_file):
-    with open(settings_file, 'rb') as f:
-        # TODO: loading settings file does not work
+    with open(settings_file, 'r') as f:
         gazetteer = dedupe.StaticGazetteer(f)
 else:
     fields = [{'field': 'name', 'type': 'String'},
@@ -92,7 +91,16 @@ else:
 
     gazetteer = dedupe.Gazetteer(fields)
     gazetteer.sample(data_1, data_2, 10000)
-    gazetteer.markPairs(training_pairs)
+
+    # The test code used known pairs to train:
+    # gazetteer.markPairs(training_pairs)
+    # Let's train manually at the console:
+    dedupe.consoleLabel(gazetteer)
+
+    # Save the manual entries in case we need them later
+    with open(training_file, 'w') as tf:
+        gazetteer.writeTraining(tf)
+
     gazetteer.train()
 
 if not gazetteer.blocked_records:
