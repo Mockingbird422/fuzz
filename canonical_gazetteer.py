@@ -89,4 +89,13 @@ for i, row in messy.iterrows():
         messy.loc[i, 'match_id'] = pair[1]
         messy.loc[i, 'match_probability'] = phat
 
-print(messy.head())
+messy['has_match'] = messy.unique_id <= clean.unique_id.max()
+messy['correct'] = (
+    messy.has_match &
+    messy.apply(lambda r: str(r['match_id']).endswith(str(r['unique_id'])), axis=1)
+) | (
+    -messy.has_match & messy.match_id.isnull()
+)
+confusion_matrix = messy.groupby(['has_match', 'correct'])['match_id'].agg(len)
+
+print(confusion_matrix)
