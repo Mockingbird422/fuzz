@@ -14,12 +14,30 @@ import numpy as np
 from tqdm import tqdm
 import click
 import json
+import re
 
 
-def _data_frame_to_dict(data, name):
-    return {
-        i: row.to_dict() for i, row in data.iterrows()
-    }
+# https://github.com/datamade/dedupe/blob/master/tests/exampleIO.py#L5-L11
+def _clean(s):
+    result = re.sub('\n', ' ', s)
+    result = re.sub(r'[^\x00-\x7F]','?', result) # remove non-ascii characters
+    result = re.sub('  +', ' ', result)
+    result = result.strip().strip('"').strip("'").lower()
+    if not result:
+        result = None
+    return result
+
+
+def read(path, encoding='utf-8'):
+    data_d = {}
+ 
+    with open(path) as f:
+        reader = csv.DictReader(f)
+        for i, row in enumerate(reader):
+            clean_row = {k : _clean(v.decode(encoding)) for (k, v) in row.iteritems()}
+            data_d[i] = clean_row
+
+    return data_d
 
 
 @click.command()
@@ -37,12 +55,8 @@ def main(clean_path, messy_path, training_file, logger_level, num_cores, fields_
     logging.getLogger().setLevel(log_level)
 
     # Read data
-    clean = pd.read_csv(clean_path)
-    messy = pd.read_csv(messy_path)
-
-    # Prepare data for gazetteer
-    data_1 = _data_frame_to_dict(clean, name=clean_path)
-    data_2 = _data_frame_to_dict(messy, name=messy_path)
+    clean = read(clean_path)
+    messy = read(messy_path)
 
     # Read metadata
     with open(fields_file) as f:
@@ -50,7 +64,7 @@ def main(clean_path, messy_path, training_file, logger_level, num_cores, fields_
 
     # Set up gazetteer
     gazetteer = dedupe.Gazetteer(fields, num_cores=num_cores)
-    gazetteer.sample(data_1, data_2, sample_size=sample_size)
+    gazetteer.sample(clean, messy, sample_size=sample_size)
 
     # Train the gazetteer at the console
     if os.path.exists(training_file):
@@ -62,20 +76,18 @@ def main(clean_path, messy_path, training_file, logger_level, num_cores, fields_
         gazetteer.writeTraining(tf)
 
     gazetteer.train()
-    gazetteer.index(data_1)
+    gazetteer.index(clean)
 
     # Add columns to messy data
-    messy['match_id'] = -1
-    messy['match_probability'] = np.nan
-    for i, row in tqdm(messy.iterrows()):
-        d = row.to_dict()
+    for i, d in tqdm(messy.iteritems()):
         match = gazetteer.match({i: d}, threshold=0)
         if match:
             pair, phat = match[0][0]
-            messy.loc[i, 'match_id'] = pair[1]
-            messy.loc[i, 'match_probability'] = phat
-
-    messy.to_csv(output_file, index=False)
+            d['match_id'] = pair[1]
+            d['match_probability'] = phat
+        else:
+            d['match_id'] = None
+            d['match_probability'] = None
 
 
 if __name__ == '__main__':
