@@ -16,12 +16,7 @@ import click
 import json
 
 
-def set_logging_level(level):
-    log_level = getattr(logging, level)
-    logging.getLogger().setLevel(log_level)
-
-
-def data_frame_to_dict(data, name):
+def _data_frame_to_dict(data, name):
     return {
         '%s:%d' % (name, i): row.to_dict() for i, row in data.iterrows()
     }
@@ -34,13 +29,15 @@ def data_frame_to_dict(data, name):
 @click.option('--logger-level', default='WARNING')
 @click.option('--num-cores', default=1)
 @click.option('--fields-file', default='example/fields.json')
-def main(clean_path, messy_path, training_file, logger_level, num_cores, fields_file):
-    set_logging_level(logger_level)
+@click.option('--output-file', default='example/output.csv')
+def main(clean_path, messy_path, training_file, logger_level, num_cores, fields_file, output_file):
+    log_level = getattr(logging, logger_level)
+    logging.getLogger().setLevel(log_level)
     
     clean = pd.read_csv(clean_path)
-    data_1 = data_frame_to_dict(clean, name=clean_path)
+    data_1 = _data_frame_to_dict(clean, name=clean_path)
     messy = pd.read_csv(messy_path)
-    data_2 = data_frame_to_dict(messy, name=messy_path)
+    data_2 = _data_frame_to_dict(messy, name=messy_path)
 
     true_matches = clean.set_index('unique_id').join(
         messy.set_index('unique_id'),
@@ -79,16 +76,7 @@ def main(clean_path, messy_path, training_file, logger_level, num_cores, fields_
             messy.loc[i, 'match_id'] = pair[1]
             messy.loc[i, 'match_probability'] = phat
 
-    messy['has_match'] = messy.unique_id <= clean.unique_id.max()
-    messy['correct'] = (
-        messy.has_match &
-        messy.apply(lambda r: str(r['match_id']).endswith(str(r['unique_id'])), axis=1)
-    ) | (
-        -messy.has_match & messy.match_id.isnull()
-    )
-    confusion_matrix = messy.groupby(['has_match', 'correct'])['match_id'].agg(len)
-
-    print(confusion_matrix)
+    messy.to_csv(output_file, index=False)
 
 
 if __name__ == '__main__':

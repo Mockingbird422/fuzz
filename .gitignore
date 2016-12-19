@@ -1,3 +1,4 @@
 *.pyc
 .dropbox
-training.json
+/example/output.csv
+/foreclosures/
