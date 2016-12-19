@@ -4,7 +4,6 @@ from __future__ import print_function
 
 import itertools
 import csv
-import exampleIO
 import dedupe
 import os
 import time
@@ -14,6 +13,7 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 import click
+import json
 
 
 def set_logging_level(level):
@@ -28,11 +28,13 @@ def data_frame_to_dict(data, name):
 
 
 @click.command()
-@click.option('--clean-path', default='restaurant-1.csv')
-@click.option('--messy-path', default='restaurant-2.csv')
-@click.option('--training-file', default='training.json')
+@click.option('--clean-path', default='example/restaurant-1.csv')
+@click.option('--messy-path', default='example/restaurant-2.csv')
+@click.option('--training-file', default='example/training.json')
 @click.option('--logger-level', default='WARNING')
-def main(clean_path, messy_path, training_file, logger_level):
+@click.option('--num-cores', default=1)
+@click.option('--fields-file', default='example/fields.json')
+def main(clean_path, messy_path, training_file, logger_level, num_cores, fields_file):
     set_logging_level(logger_level)
     
     clean = pd.read_csv(clean_path)
@@ -45,14 +47,10 @@ def main(clean_path, messy_path, training_file, logger_level):
         how='inner', lsuffix='_clean', rsuffix='_messy'
     )
 
-    fields = [
-        {'field': 'name', 'type': 'String'},
-        {'field': 'address', 'type': 'String'},
-        {'field': 'cuisine', 'type': 'String'},
-        {'field': 'city', 'type': 'String'}
-    ]
+    with open(fields_file) as f:
+        fields = json.load(f)
 
-    gazetteer = dedupe.Gazetteer(fields, num_cores=1)
+    gazetteer = dedupe.Gazetteer(fields, num_cores=num_cores)
     gazetteer.sample(data_1, data_2, 10000)
 
     # Let's train manually at the console:
