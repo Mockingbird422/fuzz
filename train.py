@@ -36,6 +36,8 @@ def read(path, encoding='utf-8'):
 @click.option('--messy-path', default='example/restaurant-2.csv')
 @click.option('--training-file', default='example/training.json')
 @click.option('--logger-level', default='WARNING')
+# TODO: If we use Anaconda then multiprocessing will not work because
+# Anaconda uses MKL: https://github.com/datamade/dedupe/issues/499
 @click.option('--num-cores', default=1)
 @click.option('--fields-file', default='example/fields.json')
 @click.option('--sample-size', default=10000)

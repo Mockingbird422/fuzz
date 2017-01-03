@@ -11,3 +11,7 @@ Use conda to install the required packages:
 Activate the environment created above:
 
     source activate dedupe
+
+Train a gazetteer:
+
+    python train.py --clean-path foreclosures/deduped_banks.csv --messy-path foreclosures/batch1.csv --training-file foreclosures/training_long.json --fields-file foreclosures/fields.json --settings-file foreclosures/my.settings
