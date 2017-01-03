@@ -1,4 +1,5 @@
 *.pyc
 .dropbox
+/example/my.settings
 /example/output.csv
 /foreclosures/
