@@ -54,18 +54,18 @@ def main(clean_path, messy_path, training_file, logger_level, num_cores, fields_
     log_level = getattr(logging, logger_level)
     logging.getLogger().setLevel(log_level)
 
-    logging.warning('Reading data ...')
+    logging.info('Reading data ...')
     clean = read(clean_path)
     messy = read(messy_path, encoding='latin-1')
 
-    logging.warning('Reading metadata ...')
+    logging.info('Reading metadata ...')
     with open(fields_file) as f:
         fields = json.load(f)
 
-    logging.warning('Initializing gazetteer ...')
+    logging.info('Initializing gazetteer ...')
     gazetteer = dedupe.Gazetteer(fields, num_cores=num_cores)
 
-    logging.warning('Sampling pairs for gazetteer ...')
+    logging.info('Sampling pairs for gazetteer ...')
     gazetteer.sample(clean, messy, sample_size=sample_size)
 
     # Train the gazetteer at the console
@@ -77,16 +77,16 @@ def main(clean_path, messy_path, training_file, logger_level, num_cores, fields_
     with open(training_file, 'w') as tf:
         gazetteer.writeTraining(tf)
 
-    logging.warning('Training gazetteer ...')
+    logging.info('Training gazetteer ...')
     gazetteer.train()
 
-    logging.warning('Indexing gazetteer ...')
+    logging.info('Indexing gazetteer ...')
     gazetteer.index(clean)
 
-    logging.warning('Find matches ...')
+    logging.info('Find matches ...')
     matches = gazetteer.match(messy, threshold=0)
 
-    logging.warning('Write matches to file ...')
+    logging.info('Write matches to file ...')
     with open(output_file, 'w') as f:
         csv_writer = csv.writer(f)
         csv_writer.writerow(['messy_id', 'clean_id', 'match_probability'])
