@@ -1,21 +1,9 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-from __future__ import print_function
-
-import itertools
+from tqdm import tqdm
+from train import read
+import click
 import csv
 import dedupe
-import os
-import time
-import optparse
 import logging
-import pandas as pd
-import numpy as np
-from tqdm import tqdm
-import click
-import json
-import re
-from train import read
 
 
 @click.command()

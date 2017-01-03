@@ -1,19 +1,10 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-from __future__ import print_function
-
-import itertools
-import csv
-import dedupe
-import os
-import time
-import optparse
-import logging
-import pandas as pd
-import numpy as np
 from tqdm import tqdm
 import click
+import csv
+import dedupe
 import json
+import logging
+import os
 import re
 
 
