@@ -33,7 +33,7 @@ def read(path, encoding='utf-8'):
  
     with open(path) as f:
         reader = csv.DictReader(f)
-        for i, row in enumerate(reader):
+        for i, row in tqdm(enumerate(reader)):
             clean_row = {k : _clean(v.decode(encoding)) for (k, v) in row.iteritems()}
             data_d[i] = clean_row
 
@@ -54,16 +54,18 @@ def main(clean_path, messy_path, training_file, logger_level, num_cores, fields_
     log_level = getattr(logging, logger_level)
     logging.getLogger().setLevel(log_level)
 
-    # Read data
+    logging.warning('Reading data ...')
     clean = read(clean_path)
-    messy = read(messy_path)
+    messy = read(messy_path, encoding='latin-1')
 
-    # Read metadata
+    logging.warning('Reading metadata ...')
     with open(fields_file) as f:
         fields = json.load(f)
 
-    # Set up gazetteer
+    logging.warning('Initializing gazetteer ...')
     gazetteer = dedupe.Gazetteer(fields, num_cores=num_cores)
+
+    logging.warning('Sampling pairs for gazetteer ...')
     gazetteer.sample(clean, messy, sample_size=sample_size)
 
     # Train the gazetteer at the console
@@ -75,19 +77,22 @@ def main(clean_path, messy_path, training_file, logger_level, num_cores, fields_
     with open(training_file, 'w') as tf:
         gazetteer.writeTraining(tf)
 
+    logging.warning('Training gazetteer ...')
     gazetteer.train()
+
+    logging.warning('Indexing gazetteer ...')
     gazetteer.index(clean)
 
-    # Add columns to messy data
-    for i, d in tqdm(messy.iteritems()):
-        match = gazetteer.match({i: d}, threshold=0)
-        if match:
-            pair, phat = match[0][0]
-            d['match_id'] = pair[1]
-            d['match_probability'] = phat
-        else:
-            d['match_id'] = None
-            d['match_probability'] = None
+    logging.warning('Find matches ...')
+    matches = gazetteer.match(messy, threshold=0)
+
+    logging.warning('Write matches to file ...')
+    with open(output_file, 'w') as f:
+        csv_writer = csv.writer(f)
+        csv_writer.writerow(['messy_id', 'clean_id', 'match_probability'])
+        for match in matches:
+            pair, phat = match[0]
+            csv_writer.writerow([pair[0], pair[1], phat])
 
 
 if __name__ == '__main__':
