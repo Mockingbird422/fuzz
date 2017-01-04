@@ -20,3 +20,5 @@ Train a gazetteer:
 
     head -n 1 foreclosures/full_data.csv > batch.csv
     tail -n +2 foreclosures/full_data.csv | shuf -n 10000 >> batch.csv
+
+TODO: How to measure confidence in results?

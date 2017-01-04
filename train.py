@@ -71,7 +71,7 @@ def main(clean_path, messy_path, training_file, logger_level, num_cores, fields_
         gazetteer.writeTraining(tf)
 
     logging.info('Training gazetteer ...')
-    gazetteer.train()
+    gazetteer.train(recall=1.0, index_predicates=False)
 
     logging.info('Indexing gazetteer ...')
     gazetteer.index(clean)
