@@ -14,4 +14,9 @@ Activate the environment created above:
 
 Train a gazetteer:
 
-    python train.py --clean-path foreclosures/deduped_banks.csv --messy-path foreclosures/batch1.csv --training-file foreclosures/training_long.json --fields-file foreclosures/fields.json --settings-file foreclosures/my.settings
+    python train.py --clean-path foreclosures/deduped_banks.csv --messy-path batch.csv --training-file training.json --fields-file foreclosures/fields.json --settings-file foreclosures/my.settings
+
+# Constructing Random Subsample
+
+    head -n 1 foreclosures/full_data.csv > batch.csv
+    tail -n +2 foreclosures/full_data.csv | shuf -n 10000 >> batch.csv
