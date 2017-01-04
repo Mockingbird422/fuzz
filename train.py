@@ -19,16 +19,17 @@ def _clean(s):
     return result
 
 
-def read(path, encoding='utf-8'):
-    data_d = {}
- 
+def iter_rows(path, encoding='utf-8'):
     with open(path) as f:
         reader = csv.DictReader(f)
-        for i, row in tqdm(enumerate(reader)):
+        for row in reader:
             clean_row = {k : _clean(v.decode(encoding)) for (k, v) in row.iteritems()}
-            data_d[i] = clean_row
+            yield clean_row
 
-    return data_d
+
+def read(*args, **kwargs):
+    rows = iter_rows(*args, **kwargs)
+    return {i: row for i, row in tqdm(enumerate(rows))}
 
 
 @click.command()

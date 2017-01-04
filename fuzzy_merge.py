@@ -1,5 +1,5 @@
 from tqdm import tqdm
-from train import read
+from train import iter_rows
 import click
 import csv
 import dedupe
@@ -17,23 +17,22 @@ def main(messy_path, logger_level, num_cores, settings_file, output_file):
     log_level = getattr(logging, logger_level)
     logging.getLogger().setLevel(log_level)
 
-    logging.info('Reading data ...')
-    messy = read(messy_path, encoding='latin-1')
-
     logging.info('Initializing gazetteer ...')
     with open(settings_file) as f:
         gazetteer = dedupe.StaticGazetteer(f, num_cores=num_cores)
 
-    logging.info('Find matches ...')
-    matches = gazetteer.match(messy, threshold=0)
+    rows = iter_rows(messy_path, encoding='latin-1')
 
-    logging.info('Write matches to file ...')
     with open(output_file, 'w') as f:
         csv_writer = csv.writer(f)
         csv_writer.writerow(['messy_id', 'clean_id', 'match_probability'])
-        for match in matches:
-            pair, phat = match[0]
-            csv_writer.writerow([pair[0], pair[1], phat])
+        for i, row in tqdm(enumerate(rows)):
+            matches = gazetteer.match({i: row}, threshold=0)
+            for match in matches:
+                pair, phat = match[0]
+                csv_writer.writerow([pair[0], pair[1], phat])
+                if i % 100:
+                    f.flush()
 
 
 if __name__ == '__main__':
