@@ -36,8 +36,10 @@ def test_example():
         --messy-path %(messy)s
         --settings-file %(settings)s
         --output-file %(output)s
+        --start 3
+        --stop 8
     ''' % paths
-    run(merge, arguments)
+    print run(merge, arguments)
 
     os.remove(paths['settings'])
     os.remove(paths['output'])

@@ -2,7 +2,7 @@
 
 How to perform fuzzy matches on Odyssey.
 
-## Installation
+# Installation
 
 Load the Anaconda Python module:
 
@@ -12,7 +12,7 @@ Use conda to install the required packages:
 
     conda env create -f environment.yml
 
-## Usage
+# Usage
 
 Load the Anaconda Python module:
 
@@ -28,9 +28,15 @@ Train a gazetteer:
 
 Merge the two datasets:
 
-    python fuzzy_merge.py --messy-path foreclosures/full_data.csv --settings-file foreclosures/my.settings --output-file temp.csv
+    python merge.py --messy-path foreclosures/full_data.csv --settings-file foreclosures/my.settings --output-file temp.csv
 
-## TODO
+# Parallel Processing
+
+I think the simplest way to break this up is to pass start and stop options to the merge. Then I'll have another program that copies files to /n/regal/ and runs a job array and weaves the results back together.
+
+1.  Add start and stop options to merge.
+
+# TODO
 
 How to measure confidence in results?
 
