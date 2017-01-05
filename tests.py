@@ -1,7 +1,7 @@
 from click.testing import CliRunner
 import shlex
-import fuzzy_merge
-import train
+from merge import merge
+from train import train
 import os
 
 
@@ -30,14 +30,14 @@ def test_example():
         --settings-file %(settings)s
         --not-interactive
     ''' % paths
-    run(train.main, arguments)
+    run(train, arguments)
 
     arguments = '''
         --messy-path %(messy)s
         --settings-file %(settings)s
         --output-file %(output)s
     ''' % paths
-    run(fuzzy_merge.main, arguments)
+    run(merge, arguments)
 
     os.remove(paths['settings'])
     os.remove(paths['output'])

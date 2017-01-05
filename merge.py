@@ -12,7 +12,7 @@ import logging
 @click.option('--num-cores', default=1)
 @click.option('--settings-file', default='example/my.settings')
 @click.option('--output-file', default='example/output.csv')
-def main(messy_path, logger_level, num_cores, settings_file, output_file):
+def merge(messy_path, logger_level, num_cores, settings_file, output_file):
     # Set logger level
     log_level = getattr(logging, logger_level)
     logging.getLogger().setLevel(log_level)
@@ -36,4 +36,4 @@ def main(messy_path, logger_level, num_cores, settings_file, output_file):
 
 
 if __name__ == '__main__':
-    main()
+    merge()

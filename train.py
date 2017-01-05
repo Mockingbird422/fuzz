@@ -44,7 +44,7 @@ def read(*args, **kwargs):
 @click.option('--sample-size', default=10000)
 @click.option('--settings-file', default='example/my.settings')
 @click.option('--interactive/--not-interactive', default=True)
-def main(clean_path, messy_path, training_file, logger_level, num_cores, fields_file, sample_size, settings_file, interactive):
+def train(clean_path, messy_path, training_file, logger_level, num_cores, fields_file, sample_size, settings_file, interactive):
     # Set logger level
     log_level = getattr(logging, logger_level)
     logging.getLogger().setLevel(log_level)
@@ -85,4 +85,4 @@ def main(clean_path, messy_path, training_file, logger_level, num_cores, fields_
 
 
 if __name__ == '__main__':
-    main()
+    train()
