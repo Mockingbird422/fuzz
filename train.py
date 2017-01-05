@@ -43,7 +43,8 @@ def read(*args, **kwargs):
 @click.option('--fields-file', default='example/fields.json')
 @click.option('--sample-size', default=10000)
 @click.option('--settings-file', default='example/my.settings')
-def main(clean_path, messy_path, training_file, logger_level, num_cores, fields_file, sample_size, settings_file):
+@click.option('--interactive/--not-interactive', default=True)
+def main(clean_path, messy_path, training_file, logger_level, num_cores, fields_file, sample_size, settings_file, interactive):
     # Set logger level
     log_level = getattr(logging, logger_level)
     logging.getLogger().setLevel(log_level)
@@ -66,10 +67,12 @@ def main(clean_path, messy_path, training_file, logger_level, num_cores, fields_
     if os.path.exists(training_file):
         with open(training_file, 'r') as tf:
             gazetteer.readTraining(tf)
-    dedupe.consoleLabel(gazetteer)
-    # Save the manual entries
-    with open(training_file, 'w') as tf:
-        gazetteer.writeTraining(tf)
+
+    if interactive:
+        dedupe.consoleLabel(gazetteer)
+        # Save the manual entries
+        with open(training_file, 'w') as tf:
+            gazetteer.writeTraining(tf)
 
     logging.info('Training gazetteer ...')
     gazetteer.train(recall=1.0, index_predicates=False)
