@@ -19,17 +19,34 @@ def _clean(s):
     return result
 
 
-def iter_rows(path, encoding='utf-8'):
+def read_csv(path, first_row_number=None, offset=None, nrows=None, encoding='utf-8'):
+    assert (first_row_number is None and offset is None and nrows is None) or \
+        (first_row_number is not None and offset is not None and nrows is not None)
+
+    read_whole_file = first_row_number is None
+    clean_row = lambda x: {k : _clean(v.decode(encoding)) for (k, v) in x.iteritems()}
+
     with open(path) as f:
         reader = csv.DictReader(f)
-        for row in reader:
-            clean_row = {k : _clean(v.decode(encoding)) for (k, v) in row.iteritems()}
-            yield clean_row
+
+        if read_whole_file:
+            for i, row in enumerate(reader):
+                yield i + 1, clean_row(row)
+        else:
+            # initialize the headers
+            first_row = reader.next()
+            # reposition the reader
+            f.seek(offset)
+            for i, row in enumerate(reader):
+                yield first_row_number + i, clean_row(row)
+                if i == nrows - 1:
+                    break
+            
 
 
 def read(*args, **kwargs):
-    rows = iter_rows(*args, **kwargs)
-    return {i: row for i, row in tqdm(enumerate(rows))}
+    enum_rows = read_csv(*args, **kwargs)
+    return {i: row for i, row in enum_rows}
 
 
 @click.command()

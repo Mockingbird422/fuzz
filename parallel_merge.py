@@ -7,6 +7,8 @@ import logging
 import math
 import sys
 import json
+import click
+import subprocess
 
 
 def line_offsets(path):
@@ -70,10 +72,33 @@ class CsvFile(object):
             'blocks': self.blocks,
             'block_size': self.block_size,
         }, indent=2)
-    
+
+
+@click.command()
+@click.option('--messy', default='example/restaurant-2.csv')
+@click.option('--settings', default='example/my.settings')
+@click.option('--nblocks', default=10)
+@click.option('--output', default='example/output.csv')
+@click.option('--logger-level', default='WARNING')
+def parallel_merge(messy, settings, nblocks, output, logger_level):
+    csv_file = CsvFile(messy)
+    csv_file.index(nblocks)
+    cmd_template = '''
+        python merge.py \
+            --messy-path %(messy)s \
+            --logger-level %(logger_level)s \
+            --settings-file %(settings)s \
+            --output-file %(block_id)d.csv \
+            --first-row-number %(first_row_number)d \
+            --offset %(offset)d \
+            --nrows %(block_size)d
+    '''
+    for block_id, d in csv_file.blocks.items():
+        d.update(locals())
+        d['block_size'] = csv_file.block_size
+        cmd = cmd_template % d
+        subprocess.call(cmd, shell=True)
+
 
 if __name__ == '__main__':
-    path = sys.argv[1]
-    f = CsvFile(path)
-    f.index(4)
-    f.print_index()
+    parallel_merge()

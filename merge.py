@@ -13,9 +13,10 @@ import itertools
 @click.option('--num-cores', default=1)
 @click.option('--settings-file', default='example/my.settings')
 @click.option('--output-file', default='example/output.csv')
-@click.option('--start', default=None, type=int)
-@click.option('--stop', default=None, type=int)
-def merge(messy_path, logger_level, num_cores, settings_file, output_file, start, stop):
+@click.option('--first-row-number', default=None, type=int)
+@click.option('--offset', default=None, type=int)
+@click.option('--nrows', default=None, type=int)
+def merge(messy_path, logger_level, num_cores, settings_file, output_file, first_row_number, offset, nrows):
     # Set logger level
     log_level = getattr(logging, logger_level)
     logging.getLogger().setLevel(log_level)
