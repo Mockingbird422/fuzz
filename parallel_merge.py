@@ -36,28 +36,44 @@ class CsvFile(object):
             'number_of_rows': self.nrows,            
         }
 
-    def blocks(self, n):
+    def index(self, nblocks):
         '''
-        Create `n` blocks of a csv file. Each block (except the last) has
-        ceiling(nrows / n) rows.
+        Create `nblocks` of a csv file. Each block (except the last) has
+        ceiling(nrows / nblocks) rows.
         '''
-        block_size = int(math.ceil(float(self.nrows) / float(n)))
+        self.blocks = {}
+        block_size = int(math.ceil(float(self.nrows) / float(nblocks)))
+        self.block_size = block_size
 
-        template = '%(csv_path)s has %(number_of_rows)s rows. To break it into %(n)s blocks, each block will have %(block_size)s rows.'
+        template = '%(csv_path)s has %(number_of_rows)s rows. To break it into %(nblocks)s blocks, each block will have %(block_size)s rows.'
         data = self.to_dict()
         data.update(locals())
-        logging.warn(template % data)
+        logging.info(template % data)
 
         first_row_in_block = None
+        block_number = 1
         for row, offset in line_offsets(self.path):
             if row % block_size == 1:
                 if first_row_in_block is not None:
                     assert row - first_row_in_block == block_size
                 first_row_in_block = row
-                print {'first_row_number': row, 'offset': offset}
+                self.blocks[block_number] = {
+                    'first_row_number': row,
+                    'offset': offset
+                }
+                block_number += 1
+
+    def print_index(self):
+        print json.dumps({
+            'path': self.path,
+            'nrows': self.nrows,
+            'blocks': self.blocks,
+            'block_size': self.block_size,
+        }, indent=2)
     
 
 if __name__ == '__main__':
     path = sys.argv[1]
     f = CsvFile(path)
-    f.blocks(4)
+    f.index(4)
+    f.print_index()

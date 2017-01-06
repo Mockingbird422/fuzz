@@ -5,7 +5,7 @@ from train import train
 # This is line #4.
 import os
 import subprocess
-from parallel import line_offsets, nrows
+from parallel_merge import line_offsets, nrows
 
 
 def run(cli, command):
