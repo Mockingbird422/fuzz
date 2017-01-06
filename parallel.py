@@ -6,6 +6,7 @@ for parallel IO.
 import logging
 import math
 import sys
+import json
 
 
 def line_offsets(path):

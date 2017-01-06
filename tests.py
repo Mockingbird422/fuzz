@@ -65,5 +65,3 @@ def nlines(path):
 
 def test_nrows():
     assert nrows(__file__) == nlines(__file__) - 1
-
-
