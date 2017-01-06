@@ -2,7 +2,10 @@ from click.testing import CliRunner
 import shlex
 from merge import merge
 from train import train
+# This is line #4.
 import os
+import subprocess
+from parallel import line_offsets, nrows
 
 
 def run(cli, command):
@@ -43,3 +46,24 @@ def test_example():
 
     os.remove(paths['settings'])
     os.remove(paths['output'])
+
+
+def test_line_offsets():
+    offsets = dict(line_offsets(__file__))
+    with open(__file__) as f:
+        # move to line number 4 - the end of the doc string
+        f.seek(offsets[4])
+        line = next(f)
+        assert line == "# This is line #4.\n"
+
+
+def nlines(path):
+    cmd = 'wc -l %s' % path
+    output = subprocess.check_output(cmd, shell=True)
+    return int(output.split(' ')[0])
+
+
+def test_nrows():
+    assert nrows(__file__) == nlines(__file__) - 1
+
+

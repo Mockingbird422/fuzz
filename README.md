@@ -35,10 +35,12 @@ Merge the two datasets:
 I think the simplest way to break this up is to pass start and stop options to the merge. Then I'll have another program that copies files to /n/regal/ and runs a job array and weaves the results back together.
 
 1.  Add start and stop options to merge.
+2.  Use striping on regal, HDF5, and a random pause to avoid hitting the disk too much.
 
-# TODO
+# Evaluating the Merge
 
-How to measure confidence in results?
+1.  How confident are we that we found _a_ match for each observation? Plot histogram of predicted probabilities over all observations in the messy data.
+2.  How confident are we that we found _the_ match for one observation? Plot histogram of predicted probabilities over all observations in the clean data.
 
 # Constructing Random Subsample
 
