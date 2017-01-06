@@ -1,5 +1,5 @@
 from tqdm import tqdm
-from train import iter_rows
+from train import read_csv
 import click
 import csv
 import dedupe
@@ -25,14 +25,12 @@ def merge(messy_path, logger_level, num_cores, settings_file, output_file, first
     with open(settings_file) as f:
         gazetteer = dedupe.StaticGazetteer(f, num_cores=num_cores)
 
-    rows = iter_rows(messy_path, encoding='latin-1')
-    enumerated_rows = enumerate(rows)
-    selected_rows = itertools.islice(enumerated_rows, start, stop)
+    rows = read_csv(messy_path, first_row_number=first_row_number, offset=offset, nrows=nrows, encoding='latin-1')
 
     with open(output_file, 'w') as f:
         csv_writer = csv.writer(f)
         csv_writer.writerow(['messy_id', 'clean_id', 'match_probability'])
-        for i, row in tqdm(selected_rows):
+        for i, row in tqdm(rows):
             matches = gazetteer.match({i: row}, threshold=0)
             assert len(matches) in [0, 1]
             if len(matches) == 0:
