@@ -5,7 +5,7 @@ from merge import merge
 from train import train
 import os
 import subprocess
-from parallel_merge import line_offsets, nrows
+from parallel_merge import line_offsets, nrows, parallel_merge
 
 
 FILE = __file__[:-1] if __file__.endswith('.pyc') else __file__
@@ -18,16 +18,20 @@ def run(cli, command):
     return result.output
 
 
-def test_example():
+def test_example(clean = True):
     paths = {
         'clean': 'example/restaurant-1.csv',
         'messy': 'example/restaurant-2.csv',
         'training': 'example/training.json',
         'fields': 'example/fields.json',
         'settings': 'temp.settings',
-        'output': 'temp.csv'
+        'output': 'temp.csv',
+        'output2': 'temp2.csv',
     }
 
+    #######################
+    # Train the gazetteer #
+    #######################
     arguments = '''
         --clean-path %(clean)s
         --messy-path %(messy)s
@@ -38,18 +42,34 @@ def test_example():
     ''' % paths
     run(train, arguments)
 
+    ########################
+    # Perform serial merge #
+    ########################
     arguments = '''
         --messy-path %(messy)s
         --settings-file %(settings)s
         --output-file %(output)s
-        --first-row-number 2
-        --offset 119
-        --nrows 2
     ''' % paths
-    print run(merge, arguments)
+    run(merge, arguments)
+
+    ##########################
+    # Perform parallel merge #
+    ##########################
+    arguments = '''
+        --messy %(messy)s
+        --settings %(settings)s
+        --nblocks 2
+        --output %(output2)s
+    ''' % paths
+    run(parallel_merge, arguments)
+
+    serial = open(paths['output']).read()
+    parallel = open(paths['output2']).read()
+    assert serial == parallel
 
     os.remove(paths['settings'])
     os.remove(paths['output'])
+    os.remove(paths['output2'])
 
 
 def test_line_offsets():

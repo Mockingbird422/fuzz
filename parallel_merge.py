@@ -9,6 +9,7 @@ import sys
 import json
 import click
 import subprocess
+import os
 
 
 def line_offsets(path):
@@ -74,6 +75,18 @@ class CsvFile(object):
         }, indent=2)
 
 
+def _combine(inputs, output):
+    with open(output, 'w') as outfile:
+        for i, path in enumerate(inputs):
+            with open(path) as infile:
+                for j, line in enumerate(infile):
+                    if j == 0:
+                        if i == 0:
+                            outfile.write(line)
+                    else:
+                        outfile.write(line)
+
+
 @click.command()
 @click.option('--messy', default='example/restaurant-2.csv')
 @click.option('--settings', default='example/my.settings')
@@ -98,6 +111,12 @@ def parallel_merge(messy, settings, nblocks, output, logger_level):
         d['block_size'] = csv_file.block_size
         cmd = cmd_template % d
         subprocess.call(cmd, shell=True)
+
+    # combine the blocks
+    paths = ['%d.csv' % (i + 1) for i in range(nblocks)]
+    _combine(paths, output)
+    for path in paths:
+        os.remove(path)
 
 
 if __name__ == '__main__':
