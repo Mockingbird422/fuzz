@@ -29,7 +29,7 @@ def merge(messy_path, logger_level, num_cores, settings_file, output_file, first
 
     with open(output_file, 'w') as f:
         csv_writer = csv.writer(f)
-        csv_writer.writerow(['messy_id', 'clean_id', 'match_probability'])
+        csv_writer.writerow(['messy_row', 'clean_row', 'match_probability'])
         for i, row in tqdm(rows):
             matches = gazetteer.match({i: row}, threshold=0)
             assert len(matches) in [0, 1]

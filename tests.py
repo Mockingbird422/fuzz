@@ -1,11 +1,14 @@
 from click.testing import CliRunner
+# This is the second line of the file.
 import shlex
 from merge import merge
 from train import train
-# This is line #4.
 import os
 import subprocess
 from parallel_merge import line_offsets, nrows
+
+
+FILE = __file__[:-1] if __file__.endswith('.pyc') else __file__
 
 
 def run(cli, command):
@@ -24,7 +27,7 @@ def test_example():
         'settings': 'temp.settings',
         'output': 'temp.csv'
     }
-    
+
     arguments = '''
         --clean-path %(clean)s
         --messy-path %(messy)s
@@ -39,8 +42,9 @@ def test_example():
         --messy-path %(messy)s
         --settings-file %(settings)s
         --output-file %(output)s
-        --start 3
-        --stop 8
+        --first-row-number 2
+        --offset 119
+        --nrows 2
     ''' % paths
     print run(merge, arguments)
 
@@ -49,12 +53,11 @@ def test_example():
 
 
 def test_line_offsets():
-    offsets = dict(line_offsets(__file__))
-    with open(__file__) as f:
-        # move to line number 4 - the end of the doc string
-        f.seek(offsets[4])
+    offsets = dict(line_offsets(FILE))
+    with open(FILE) as f:
+        f.seek(offsets[1])
         line = next(f)
-        assert line == "# This is line #4.\n"
+        assert line == "# This is the second line of the file.\n"
 
 
 def nlines(path):
@@ -64,4 +67,6 @@ def nlines(path):
 
 
 def test_nrows():
-    assert nrows(__file__) == nlines(__file__) - 1
+    number_of_rows = nrows(FILE)
+    number_of_lines = nlines(FILE)
+    assert number_of_rows == number_of_lines - 1, locals()

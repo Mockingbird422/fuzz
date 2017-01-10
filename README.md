@@ -42,6 +42,10 @@ I think the simplest way to break this up is to pass start and stop options to t
 1.  How confident are we that we found _a_ match for each observation? Plot histogram of predicted probabilities over all observations in the messy data.
 2.  How confident are we that we found _the_ match for one observation? Plot histogram of predicted probabilities over all observations in the clean data.
 
+# TODO
+
+As an alternative to using row numbers in the output file we should also allow for specifying id columns.
+
 # Constructing Random Subsample
 
     head -n 1 foreclosures/full_data.csv > batch.csv
