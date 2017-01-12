@@ -5,25 +5,17 @@ import csv
 import dedupe
 import logging
 import itertools
+import os
 
 
-@click.command()
-@click.option('--messy-path', default='example/restaurant-2.csv')
-@click.option('--logger-level', default='WARNING')
-@click.option('--num-cores', default=1)
-@click.option('--settings-file', default='example/my.settings')
-@click.option('--output-file', default='example/output.csv')
-@click.option('--first-row-number', default=None, type=int)
-@click.option('--offset', default=None, type=int)
-@click.option('--nrows', default=None, type=int)
-def merge(messy_path, logger_level, num_cores, settings_file, output_file, first_row_number, offset, nrows):
+def merge(messy_path, settings_file, output_file, first_row_number, offset, nrows):
     # Set logger level
-    log_level = getattr(logging, logger_level)
+    log_level = os.environ.get('LOGGER_LEVEL', 'WARNING')
     logging.getLogger().setLevel(log_level)
 
     logging.info('Initializing gazetteer ...')
     with open(settings_file) as f:
-        gazetteer = dedupe.StaticGazetteer(f, num_cores=num_cores)
+        gazetteer = dedupe.StaticGazetteer(f, num_cores=1)
 
     rows = read_csv(messy_path, first_row_number=first_row_number, offset=offset, nrows=nrows, encoding='latin-1')
 
@@ -44,5 +36,16 @@ def merge(messy_path, logger_level, num_cores, settings_file, output_file, first
                 f.flush()
 
 
+@click.command()
+@click.option('--messy-path', default='example/restaurant-2.csv')
+@click.option('--settings-file', default='example/my.settings')
+@click.option('--output-file', default='example/output.csv')
+@click.option('--first-row-number', default=None, type=int)
+@click.option('--offset', default=None, type=int)
+@click.option('--nrows', default=None, type=int)
+def main(*args, **kwargs):
+    merge(*args, **kwargs)
+
+
 if __name__ == '__main__':
-    merge()
+    main()

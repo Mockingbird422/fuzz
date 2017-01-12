@@ -59,7 +59,7 @@ class CsvFile(dict):
 @click.command()
 @click.option('--messy', default='example/restaurant-2.csv')
 @click.option('--nblocks', default=10)
-@click.option('--json-file', default='index.json')
+@click.option('--json-file', default='example/index.json')
 def index(messy, nblocks, json_file):
     csv_file = CsvFile()
     csv_file.index(path=messy, nblocks=nblocks)
