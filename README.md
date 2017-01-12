@@ -1,3 +1,12 @@
+# Next Up: Parallel Processing
+
+1.  Copy files to /n/regal
+2.  Run job array, add random pause to avoid hitting static files too hard.
+3.  Weave results back together.
+
+
+
+
 # Fuzzy Merge
 
 How to perform fuzzy matches on Odyssey.
@@ -29,13 +38,6 @@ Train a gazetteer:
 Merge the two datasets:
 
     python merge.py --messy-path foreclosures/full_data.csv --settings-file foreclosures/my.settings --output-file temp.csv
-
-# Parallel Processing
-
-I think the simplest way to break this up is to pass start and stop options to the merge. Then I'll have another program that copies files to /n/regal/ and runs a job array and weaves the results back together.
-
-1.  Add start and stop options to merge.
-2.  Use striping on regal, HDF5, and a random pause to avoid hitting the disk too much.
 
 # Evaluating the Merge
 
