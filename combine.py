@@ -12,7 +12,7 @@ def combine(nblocks, output):
             with open(path) as infile:
                 for j, line in enumerate(infile):
                     if j == 0:
-                        if i == 0:
+                        if i == 1:
                             outfile.write(line)
                     else:
                         outfile.write(line)

@@ -1,11 +1,12 @@
 from click.testing import CliRunner
 # This is the second line of the file.
 import shlex
-from merge import merge
+from merge import main as merge
 from train import train
 import os
 import subprocess
-from parallel_merge import line_offsets, nrows, parallel_merge
+from index import line_offsets, nrows
+from parallel_merge import parallel_merge
 
 
 FILE = __file__[:-1] if __file__.endswith('.pyc') else __file__
@@ -51,6 +52,7 @@ def test_example(clean = True):
         --output-file %(output)s
     ''' % paths
     run(merge, arguments)
+    assert os.path.exists(paths['output'])
 
     ##########################
     # Perform parallel merge #
@@ -58,7 +60,7 @@ def test_example(clean = True):
     arguments = '''
         --messy %(messy)s
         --settings %(settings)s
-        --nblocks 2
+        --nblocks 3
         --output %(output2)s
     ''' % paths
     run(parallel_merge, arguments)
