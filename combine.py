@@ -1,13 +1,17 @@
 import click
 import os
+from index import CsvFile
 
 
 @click.command()
-@click.option('--nblocks', default=10)
+@click.option('--json-file', default='example/index.json')
 @click.option('--output', default='output.csv')
-def combine(nblocks, output):
+def combine(json_file, output):
+    csv_file = CsvFile()
+    with open(json_file) as f:
+        csv_file.load(f)
     with open(output, 'w') as outfile:
-        for i in range(1, nblocks + 1):
+        for i in range(1, csv_file['nblocks'] + 1):
             path = '%d.csv' % i
             with open(path) as infile:
                 for j, line in enumerate(infile):
@@ -16,9 +20,12 @@ def combine(nblocks, output):
                             outfile.write(line)
                     else:
                         outfile.write(line)
-    for i in range(1, nblocks + 1):
+
+    # clean up
+    for i in range(1, csv_file['nblocks'] + 1):
         path = '%d.csv' % i
         os.remove(path)
+    os.remove(json_file)
 
 
 if __name__ == '__main__':

@@ -1,8 +1,10 @@
-# Next Up: Parallel Processing
+# Next Up: Write Batch Scripts
 
-1.  Copy files to /n/regal
-2.  Run job array, add random pause to avoid hitting static files too hard.
-3.  Weave results back together.
+    sbatch -p general -n 1 -N 1 -t 0-1:00 --mem 4000 python index.py --messy example/restaurant-2.csv --nblocks 3 --json-file temp.json
+    
+    sbatch: error: This does not look like a batch script.  The first
+    sbatch: error: line must start with #! followed by the path to an interpreter.
+    sbatch: error: For instance: #!/bin/sh
 
 
 
