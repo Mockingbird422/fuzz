@@ -8,4 +8,4 @@
 #SBATCH --open-mode=append # Don't reset log when requeued
 
 echo "$*"
-python merge_block.py --block-id ${SLURM_ARRAY_TASK_ID} $*
+python /n/hbs_pilot/Lab/amarder/gazetteer/merge_block.py --block-id ${SLURM_ARRAY_TASK_ID} $*

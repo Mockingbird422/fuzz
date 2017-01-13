@@ -23,17 +23,17 @@ def my_call(command):
 
 
 INDEX = '''
-sbatch index.sh --messy %(messy)s --nblocks %(nblocks)d --json-file %(json_file)s
+sbatch %(this_directory)s/index.sh --messy %(messy)s --nblocks %(nblocks)d --json-file %(json_file)s
 '''
 
 MERGE_BLOCKS = '''
 sbatch --dependency=afterok:%(index_job_id)d --array=1-%(nblocks)d \
-merge_block.sh --settings %(settings)s --json-file %(json_file)s
+%(this_directory)s/merge_block.sh --settings %(settings)s --json-file %(json_file)s
 '''
 
 COMBINE = '''
 sbatch --dependency=afterok:%(merge_job_id)d \
-combine.sh --json-file %(json_file)s --output %(output)s
+%(this_directory)s/combine.sh --json-file %(json_file)s --output %(output)s
 '''
 
 
@@ -44,6 +44,8 @@ combine.sh --json-file %(json_file)s --output %(output)s
 @click.option('--output', default='example/output.csv')
 @click.option('--json-file', default='temp.json')
 def parallel_merge(messy, settings, nblocks, output, json_file):
+    this_directory = os.path.dirname(os.path.abspath(__file__))
+    
     ##############################
     # Index the large messy file #
     ##############################
