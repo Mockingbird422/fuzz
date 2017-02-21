@@ -6,6 +6,12 @@ import json
 import logging
 import os
 import re
+import pkg_resources
+
+
+def data_path(filename):
+    relpath = os.path.join('data', filename)
+    return pkg_resources.resource_filename('fuzz', relpath)
 
 
 # https://github.com/datamade/dedupe/blob/master/tests/exampleIO.py#L5-L11
@@ -50,16 +56,16 @@ def read(*args, **kwargs):
 
 
 @click.command()
-@click.option('--clean-path', default='example/restaurant-1.csv')
-@click.option('--messy-path', default='example/restaurant-2.csv')
-@click.option('--training-file', default='example/training.json')
+@click.option('--clean-path', default=data_path('restaurant-1.csv'))
+@click.option('--messy-path', default=data_path('restaurant-2.csv'))
+@click.option('--training-file', default=data_path('training.json'))
 @click.option('--logger-level', default='WARNING')
 # TODO: If we use Anaconda then multiprocessing will not work because
 # Anaconda uses MKL: https://github.com/datamade/dedupe/issues/499
 @click.option('--num-cores', default=1)
-@click.option('--fields-file', default='example/fields.json')
+@click.option('--fields-file', default=data_path('fields.json'))
 @click.option('--sample-size', default=10000)
-@click.option('--settings-file', default='example/my.settings')
+@click.option('--settings-file', default='my.settings')
 @click.option('--interactive/--not-interactive', default=True)
 def train(clean_path, messy_path, training_file, logger_level, num_cores, fields_file, sample_size, settings_file, interactive):
     # Set logger level
