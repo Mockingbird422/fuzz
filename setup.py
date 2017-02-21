@@ -20,6 +20,7 @@ setup(
     install_requires=get_requirements(),
     entry_points='''
         [console_scripts]
-        fuzz=fuzz.__main__:main
+        train=fuzz.train:train
+        merge=fuzz.merge:merge
     '''
 )
