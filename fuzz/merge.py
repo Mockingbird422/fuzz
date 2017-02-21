@@ -1,5 +1,5 @@
 from tqdm import tqdm
-from train import read_csv
+from train import read_csv, data_path
 import click
 import csv
 import dedupe
@@ -37,9 +37,9 @@ def merge(messy_path, settings_file, output_file, first_row_number, offset, nrow
 
 
 @click.command()
-@click.option('--messy-path', default='example/restaurant-2.csv')
-@click.option('--settings-file', default='example/my.settings')
-@click.option('--output-file', default='example/output.csv')
+@click.option('--messy-path', default=data_path('restaurant-2.csv'))
+@click.option('--settings-file', default='my.settings')
+@click.option('--output-file', default='output.csv')
 @click.option('--first-row-number', default=None, type=int)
 @click.option('--offset', default=None, type=int)
 @click.option('--nrows', default=None, type=int)
