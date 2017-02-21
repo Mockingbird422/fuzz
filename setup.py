@@ -21,6 +21,6 @@ setup(
     entry_points='''
         [console_scripts]
         train=fuzz.train:train
-        merge=fuzz.merge:merge
+        merge=fuzz.merge:main
     '''
 )
