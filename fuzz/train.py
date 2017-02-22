@@ -9,8 +9,8 @@ import re
 import pkg_resources
 
 
-def data_path(filename):
-    relpath = os.path.join('data', filename)
+def get_path(*args):
+    relpath = os.path.join(*args)
     return pkg_resources.resource_filename('fuzz', relpath)
 
 
@@ -56,14 +56,14 @@ def read(*args, **kwargs):
 
 
 @click.command()
-@click.option('--clean-path', default=data_path('restaurant-1.csv'))
-@click.option('--messy-path', default=data_path('restaurant-2.csv'))
-@click.option('--training-file', default=data_path('training.json'))
+@click.option('--clean-path', default=get_path('data', 'restaurant-1.csv'))
+@click.option('--messy-path', default=get_path('data', 'restaurant-2.csv'))
+@click.option('--training-file', default=get_path('data', 'training.json'))
 @click.option('--logger-level', default='WARNING')
 # TODO: If we use Anaconda then multiprocessing will not work because
 # Anaconda uses MKL: https://github.com/datamade/dedupe/issues/499
 @click.option('--num-cores', default=1)
-@click.option('--fields-file', default=data_path('fields.json'))
+@click.option('--fields-file', default=get_path('data', 'fields.json'))
 @click.option('--sample-size', default=10000)
 @click.option('--settings-file', default='my.settings')
 @click.option('--interactive/--not-interactive', default=True)

@@ -3,7 +3,7 @@ import subprocess
 import os
 import re
 import time
-from train import data_path
+from train import get_path
 
 
 def _slurm_available():
@@ -18,7 +18,7 @@ class Slurm(object):
 
     INDEX = ' '.join([
         'sbatch',
-        data_path('index.sh'),
+        get_path('scripts', 'index.sh'),
         '--messy %(messy)s',
         '--nblocks %(nblocks)d',
         '--json-file %(json_file)s'
@@ -28,7 +28,7 @@ class Slurm(object):
         'sbatch',
         '--dependency=afterok:%(index_job_id)d',
         '--array=1-%(nblocks)d',
-        data_path('merge_block.sh'),
+        get_path('scripts', 'merge_block.sh'),
         '--settings %(settings)s',
         '--json-file %(json_file)s'
     ])
@@ -36,7 +36,7 @@ class Slurm(object):
     COMBINE = ' '.join([
         'sbatch',
         '--dependency=afterok:%(merge_job_id)d',
-        data_path('combine.sh'),
+        get_path('scripts', 'combine.sh'),
         '--json-file %(json_file)s',
         '--output %(output)s'
     ])
@@ -77,20 +77,20 @@ class Serial(Slurm):
     '''
 
     INDEX = ' '.join([
-        data_path('index.sh'),
+        get_path('scripts', 'index.sh'),
         '--messy %(messy)s',
         '--nblocks %(nblocks)d',
         '--json-file %(json_file)s'
     ])
 
     MERGE_BLOCKS = ' '.join([
-        data_path('merge_block.sh'),
+        get_path('scripts', 'merge_block.sh'),
         '--settings %(settings)s',
         '--json-file %(json_file)s'
     ])
 
     COMBINE = ' '.join([
-        data_path('combine.sh'),
+        get_path('scripts', 'combine.sh'),
         '--json-file %(json_file)s',
         '--output %(output)s'
     ])
@@ -123,7 +123,7 @@ class Serial(Slurm):
 
 
 @click.command()
-@click.option('--messy', default=data_path('restaurant-2.csv'))
+@click.option('--messy', default=get_path('data', 'restaurant-2.csv'))
 @click.option('--settings', default='my.settings')
 @click.option('--nblocks', default=10)
 @click.option('--output', default='output.csv')
