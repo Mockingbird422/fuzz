@@ -1,3 +1,8 @@
+# fuzz
+
+[![Build Status](https://travis-ci.org/amarder/fuzz.svg?branch=master)](https://travis-ci.org/amarder/fuzz)
+[![Coverage Status](https://coveralls.io/repos/github/amarder/fuzz/badge.svg?branch=master)](https://coveralls.io/github/amarder/fuzz?branch=master)
+
 # Next Up: Write Batch Scripts
 
     sbatch -p general -n 1 -N 1 -t 0-1:00 --mem 4000 python index.py --messy example/restaurant-2.csv --nblocks 3 --json-file temp.json
