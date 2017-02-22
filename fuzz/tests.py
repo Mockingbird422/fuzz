@@ -64,23 +64,21 @@ def test_example(clean=True):
     # Perform parallel merge #
     ##########################
 
-    # TODO: How to run without SLURM
+    arguments = '''
+        --messy %(messy)s
+        --settings %(settings)s
+        --nblocks 3
+        --output %(output2)s
+    ''' % paths
+    run(parallel_merge, arguments)
 
-    # arguments = '''
-    #     --messy %(messy)s
-    #     --settings %(settings)s
-    #     --nblocks 3
-    #     --output %(output2)s
-    # ''' % paths
-    # run(parallel_merge, arguments)
-
-    # serial = open(paths['output']).read()
-    # parallel = open(paths['output2']).read()
-    # assert serial == parallel
+    serial = open(paths['output']).read()
+    parallel = open(paths['output2']).read()
+    assert serial == parallel
 
     os.remove(paths['settings'])
     os.remove(paths['output'])
-    # os.remove(paths['output2'])
+    os.remove(paths['output2'])
 
 
 def test_line_offsets():

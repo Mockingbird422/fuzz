@@ -9,4 +9,4 @@
 #SBATCH --constraint=holyib # run on InfiniBand
 
 echo "$*"
-python /n/hbs_pilot/Lab/amarder/gazetteer/merge_block.py --block-id ${SLURM_ARRAY_TASK_ID} $*
+merge_block --block-id ${SLURM_ARRAY_TASK_ID} $*

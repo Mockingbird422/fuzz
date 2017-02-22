@@ -6,4 +6,4 @@
 #SBATCH -t 0-1:00         # Running time of 1 hour
 #SBATCH --mem 4000        # Memory request of 4 GB
 
-python /n/hbs_pilot/Lab/amarder/gazetteer/index.py $*
+combine $*

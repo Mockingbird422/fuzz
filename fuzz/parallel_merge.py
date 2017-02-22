@@ -1,70 +1,136 @@
-'''
-The purpose of this script is to make it easy to move around a long
-text file without reading the whole file every time. This is important
-for parallel IO.
-'''
-import logging
-import math
-import sys
-import json
 import click
 import subprocess
 import os
 import re
 import time
+from train import data_path
 
 
-def my_call(command):
-    print command
-    output = subprocess.check_output(command, shell=True)
-    m = re.search('^Submitted batch job (\d+)$', output)
-    assert m, output
-    return int(m.group(1))
+def _slurm_available():
+    retcode = subprocess.call('which sbatch', shell=True)
+    return retcode == 0
 
 
-INDEX = '''
-sbatch %(this_directory)s/index.sh --messy %(messy)s --nblocks %(nblocks)d --json-file %(json_file)s
-'''
+class Slurm(object):
+    '''
+    Use Slurm to merge two CSV files in parallel.
+    '''
 
-MERGE_BLOCKS = '''
-sbatch --dependency=afterok:%(index_job_id)d --array=1-%(nblocks)d \
-%(this_directory)s/merge_block.sh --settings %(settings)s --json-file %(json_file)s
-'''
+    INDEX = ' '.join([
+        'sbatch',
+        data_path('index.sh'),
+        '--messy %(messy)s',
+        '--nblocks %(nblocks)d',
+        '--json-file %(json_file)s'
+    ])
 
-COMBINE = '''
-sbatch --dependency=afterok:%(merge_job_id)d \
-%(this_directory)s/combine.sh --json-file %(json_file)s --output %(output)s
-'''
+    MERGE_BLOCKS = ' '.join([
+        'sbatch',
+        '--dependency=afterok:%(index_job_id)d',
+        '--array=1-%(nblocks)d',
+        data_path('merge_block.sh'),
+        '--settings %(settings)s',
+        '--json-file %(json_file)s'
+    ])
+
+    COMBINE = ' '.join([
+        'sbatch',
+        '--dependency=afterok:%(merge_job_id)d',
+        data_path('combine.sh'),
+        '--json-file %(json_file)s',
+        '--output %(output)s'
+    ])
+
+    def _call(self, command):
+        print command
+        output = subprocess.check_output(command, shell=True)
+        m = re.search('^Submitted batch job (\d+)$', output)
+        assert m, output
+        return int(m.group(1))
+
+    def merge(self, messy, settings, nblocks, output, json_file):
+        ##############################
+        # Index the large messy file #
+        ##############################
+        command = self.INDEX % locals()
+        index_job_id = self._call(command)
+        time.sleep(1)
+
+        ####################
+        # Merge each block #
+        ####################
+        command = self.MERGE_BLOCKS % locals()
+        merge_job_id = self._call(command)
+        time.sleep(1)
+
+        ######################
+        # Combine the blocks #
+        ######################
+        command = self.COMBINE % locals()
+        self._call(command)
+
+
+class Serial(Slurm):
+    '''
+    Most development machines will not have Slurm set up. Use this
+    code to test the parallel merge when Slurm is not available.
+    '''
+
+    INDEX = ' '.join([
+        data_path('index.sh'),
+        '--messy %(messy)s',
+        '--nblocks %(nblocks)d',
+        '--json-file %(json_file)s'
+    ])
+
+    MERGE_BLOCKS = ' '.join([
+        data_path('merge_block.sh'),
+        '--settings %(settings)s',
+        '--json-file %(json_file)s'
+    ])
+
+    COMBINE = ' '.join([
+        data_path('combine.sh'),
+        '--json-file %(json_file)s',
+        '--output %(output)s'
+    ])
+
+    def _call(self, command):
+        print command
+        output = subprocess.check_output(command, shell=True)
+        return output
+
+    def merge(self, messy, settings, nblocks, output, json_file):
+        ##############################
+        # Index the large messy file #
+        ##############################
+        command = self.INDEX % locals()
+        self._call(command)
+
+        ####################
+        # Merge each block #
+        ####################
+        for i in range(1, nblocks + 1):
+            os.environ['SLURM_ARRAY_TASK_ID'] = str(i)
+            command = self.MERGE_BLOCKS % locals()
+            self._call(command)
+
+        ######################
+        # Combine the blocks #
+        ######################
+        command = self.COMBINE % locals()
+        self._call(command)
 
 
 @click.command()
-@click.option('--messy', default='example/restaurant-2.csv')
-@click.option('--settings', default='example/my.settings')
+@click.option('--messy', default=data_path('restaurant-2.csv'))
+@click.option('--settings', default='my.settings')
 @click.option('--nblocks', default=10)
-@click.option('--output', default='example/output.csv')
+@click.option('--output', default='output.csv')
 @click.option('--json-file', default='temp.json')
-def parallel_merge(messy, settings, nblocks, output, json_file):
-    this_directory = os.path.dirname(os.path.abspath(__file__))
-    
-    ##############################
-    # Index the large messy file #
-    ##############################
-    command = INDEX % locals()
-    index_job_id = my_call(command)
-    time.sleep(1)
-
-    ####################
-    # Merge each block #
-    ####################
-    command = MERGE_BLOCKS % locals()
-    merge_job_id = my_call(command)
-    time.sleep(1)
-
-    ######################
-    # Combine the blocks #
-    ######################
-    command = COMBINE % locals()
-    my_call(command)
+def parallel_merge(*args, **kwargs):
+    s = Slurm() if _slurm_available() else Serial()
+    s.merge(*args, **kwargs)
 
 
 if __name__ == '__main__':

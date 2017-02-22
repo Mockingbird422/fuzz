@@ -22,5 +22,9 @@ setup(
         [console_scripts]
         train=fuzz.train:train
         merge=fuzz.merge:main
+        index=fuzz.index:index
+        merge_block=fuzz.merge_block:merge_block
+        combine=fuzz.combine:combine
+        parallel_merge=fuzz.parallel_merge:parallel_merge
     '''
 )
