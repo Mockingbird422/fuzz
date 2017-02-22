@@ -3,6 +3,12 @@
 [![Build Status](https://travis-ci.org/amarder/fuzz.svg?branch=master)](https://travis-ci.org/amarder/fuzz)
 [![Coverage Status](https://coveralls.io/repos/github/amarder/fuzz/badge.svg?branch=master)](https://coveralls.io/github/amarder/fuzz?branch=master)
 
+`fuzz` is a Python library designed to make fuzzy merges of large CSV files easy. Why not use [csvdedupe](https://github.com/datamade/csvdedupe)?
+
+*   Support for parallel computation via [Slurm](https://slurm.schedmd.com/). This is convenient if you're working on Harvard's [Odyssey](https://rc.fas.harvard.edu/odyssey/) cluster.
+
+*   Clear separation of the training and merge steps. Use the `train` command to fit your model. Use the `merge` command to merge your two datasets using a previously fitted model. This is helpful if training takes a long time.
+
 # Next Up: Write Batch Scripts
 
     sbatch -p general -n 1 -N 1 -t 0-1:00 --mem 4000 python index.py --messy example/restaurant-2.csv --nblocks 3 --json-file temp.json
@@ -10,9 +16,6 @@
     sbatch: error: This does not look like a batch script.  The first
     sbatch: error: line must start with #! followed by the path to an interpreter.
     sbatch: error: For instance: #!/bin/sh
-
-
-
 
 # Fuzzy Merge
 
