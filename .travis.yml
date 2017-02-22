@@ -1,0 +1,10 @@
+language: python
+
+install:
+  - pip install --upgrade pip setuptools
+  - python setup.py install
+  - pip install -r dev-requirements.txt
+
+script: nosetests
+
+after_success: coveralls
