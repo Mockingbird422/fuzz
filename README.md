@@ -11,31 +11,34 @@
 
 # Installation
 
-Load the Anaconda Python module:
+    pip install git+https://github.com/amarder/fuzz.git
+
+# Example Usage on Odyssey
+
+Create a new virtual environment using conda:
 
     module load Anaconda
+    conda create -n myenv python --yes
 
-Use conda to install the required packages:
+Activate the environment:
 
-    conda env create -f environment.yml
+    source activate myenv
 
-# Usage
+Install `pip`:
 
-Load the Anaconda Python module:
+    conda install pip --yes
 
-    module load Anaconda
+Use `pip` to install `fuzz`:
 
-Activate the environment created above:
+    pip install git+https://github.com/amarder/fuzz.git
 
-    source activate dedupe
+Train a model using the restaurant data that ships as part of the `fuzz` package (this will create a new file called `my.settings` that describes the [fitted model](https://dedupe.readthedocs.io/en/latest/API-documentation.html#staticgazetteer-objects)):
 
-Train a gazetteer:
+    train
 
-    python train.py --clean-path foreclosures/deduped_banks.csv --messy-path batch.csv --training-file training.json --fields-file foreclosures/fields.json --settings-file foreclosures/my.settings
+Merge the restaurant data (this will create a new file called `output.csv` that describes the fuzzy matches):
 
-Merge the two datasets:
-
-    python merge.py --messy-path foreclosures/full_data.csv --settings-file foreclosures/my.settings --output-file temp.csv
+    merge
 
 # Constructing Random Subsample
 
