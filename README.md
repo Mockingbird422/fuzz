@@ -11,26 +11,32 @@
 
 # Installation
 
-    pip install git+https://github.com/amarder/fuzz.git
-
-# Example Usage on Odyssey
-
-Create a new virtual environment using conda:
-
-    module load Anaconda
-    conda create -n myenv python --yes
-
-Activate the environment:
-
-    source activate myenv
-
-Install `pip`:
-
-    conda install pip --yes
-
-Use `pip` to install `fuzz`:
+This repository has been designed for an easy pip install:
 
     pip install git+https://github.com/amarder/fuzz.git
+    
+## Installation on Odyssey
+
+Installing this package on Odyssey is a little harder. Here are the steps I used to install it in a virtual environment:
+
+1.  Create a new virtual environment using conda:
+
+        module load Anaconda
+        conda create -n myenv python --yes
+
+2.  Activate the environment:
+
+        source activate myenv
+
+3.  Install `pip`:
+
+        conda install pip --yes
+
+4.  Use `pip` to install `fuzz`:
+
+        pip install git+https://github.com/amarder/fuzz.git
+
+# Example Usage
 
 Train a model using the restaurant data that ships as part of the `fuzz` package (this will create a new file called `my.settings` that describes the [fitted model](https://dedupe.readthedocs.io/en/latest/API-documentation.html#staticgazetteer-objects)):
 
