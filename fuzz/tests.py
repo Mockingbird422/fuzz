@@ -12,6 +12,11 @@ from parallel_merge import parallel_merge
 FILE = __file__[:-1] if __file__.endswith('.pyc') else __file__
 
 
+def _relpath(*args):
+    this_dir = os.path.dirname(FILE)
+    return os.path.join(this_dir, *args)
+
+
 def run(cli, command):
     runner = CliRunner()
     args = shlex.split(command.strip())
@@ -19,12 +24,12 @@ def run(cli, command):
     return result.output
 
 
-def test_example(clean = True):
+def test_example(clean=True):
     paths = {
-        'clean': 'example/restaurant-1.csv',
-        'messy': 'example/restaurant-2.csv',
-        'training': 'example/training.json',
-        'fields': 'example/fields.json',
+        'clean': _relpath('data', 'restaurant-1.csv'),
+        'messy': _relpath('data', 'restaurant-2.csv'),
+        'training': _relpath('data', 'training.json'),
+        'fields': _relpath('data', 'fields.json'),
         'settings': 'temp.settings',
         'output': 'temp.csv',
         'output2': 'temp2.csv',
@@ -41,7 +46,8 @@ def test_example(clean = True):
         --settings-file %(settings)s
         --not-interactive
     ''' % paths
-    run(train, arguments)
+    print run(train, arguments)
+    assert os.path.exists(paths['settings'])
 
     ########################
     # Perform serial merge #
@@ -51,7 +57,7 @@ def test_example(clean = True):
         --settings-file %(settings)s
         --output-file %(output)s
     ''' % paths
-    run(merge, arguments)
+    print run(merge, arguments)
     assert os.path.exists(paths['output'])
 
     ##########################
@@ -59,7 +65,7 @@ def test_example(clean = True):
     ##########################
 
     # TODO: How to run without SLURM
-    
+
     # arguments = '''
     #     --messy %(messy)s
     #     --settings %(settings)s
@@ -72,8 +78,8 @@ def test_example(clean = True):
     # parallel = open(paths['output2']).read()
     # assert serial == parallel
 
-    # os.remove(paths['settings'])
-    # os.remove(paths['output'])
+    os.remove(paths['settings'])
+    os.remove(paths['output'])
     # os.remove(paths['output2'])
 
 
