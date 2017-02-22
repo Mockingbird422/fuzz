@@ -4,11 +4,11 @@ import click
 import csv
 import dedupe
 import logging
-import itertools
 import os
 
 
-def merge(messy_path, settings_file, output_file, first_row_number, offset, nrows):
+def merge(messy_path, settings_file, output_file, first_row_number,
+          offset, nrows):
     # Set logger level
     log_level = os.environ.get('LOGGER_LEVEL', 'WARNING')
     logging.getLogger().setLevel(log_level)
@@ -17,13 +17,22 @@ def merge(messy_path, settings_file, output_file, first_row_number, offset, nrow
     with open(settings_file) as f:
         gazetteer = dedupe.StaticGazetteer(f, num_cores=1)
 
-    rows = read_csv(messy_path, first_row_number=first_row_number, offset=offset, nrows=nrows, encoding='latin-1')
+    rows = read_csv(
+        messy_path,
+        first_row_number=first_row_number,
+        offset=offset,
+        nrows=nrows,
+        encoding='latin-1'
+    )
 
     with open(output_file, 'w') as f:
         csv_writer = csv.writer(f)
         csv_writer.writerow(['messy_row', 'clean_row', 'match_probability'])
         for i, row in tqdm(rows):
-            matches = gazetteer.match({i: row}, threshold=0)
+            try:
+                matches = gazetteer.match({i: row}, threshold=0)
+            except ValueError:
+                matches = []
             assert len(matches) in [0, 1]
             if len(matches) == 0:
                 out_row = [i, '', 0]
