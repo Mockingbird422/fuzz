@@ -6,9 +6,10 @@
 #
 affinegap==1.10           # via canonicalize, dedupe
 appdirs==1.4.0            # via setuptools
-BTrees==4.4.1             # via dedupe, zope.index
+btrees==4.4.1             # via dedupe, zope.index
 canonicalize==1.3         # via dedupe
 categorical-distance==1.9  # via dedupe
+click==6.7
 dedupe-hcluster==0.3.2    # via dedupe
 dedupe==1.6.1
 doublemetaphone==0.1      # via dedupe
@@ -16,7 +17,7 @@ fastcluster==1.1.22       # via dedupe
 future==0.16.0            # via dedupe, dedupe-hcluster, rlr
 haversine==0.4.5          # via dedupe
 highered==0.2.1           # via dedupe
-Levenshtein-search==1.4.2  # via dedupe
+levenshtein-search==1.4.2  # via dedupe
 numpy==1.12.0             # via canonicalize, categorical-distance, dedupe-hcluster, highered, pyhacrf-datamade, pylbfgs, rlr, simplecosine
 packaging==16.8           # via setuptools
 persistent==4.2.2         # via btrees, zope.index
