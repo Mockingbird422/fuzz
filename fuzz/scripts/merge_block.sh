@@ -9,4 +9,4 @@
 #SBATCH --constraint=holyib # run on InfiniBand
 
 echo "$*"
-fuzz _merge_block --block-id ${SLURM_ARRAY_TASK_ID} $*
+_fuzz merge_block --block-id ${SLURM_ARRAY_TASK_ID} $*

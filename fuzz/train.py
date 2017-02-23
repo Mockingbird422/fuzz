@@ -47,7 +47,6 @@ def read_csv(path, first_row_number=None, offset=None, nrows=None, encoding='utf
                 yield first_row_number + i, clean_row(row)
                 if i == nrows - 1:
                     break
-            
 
 
 def read(*args, **kwargs):

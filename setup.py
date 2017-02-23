@@ -16,10 +16,11 @@ setup(
     name="fuzz",
     version="0.1",
     packages=find_packages(),
-    package_data={"fuzz": ["data/*"]},
+    package_data={"fuzz": ["data/*", "scripts/*"]},
     install_requires=get_requirements(),
     entry_points='''
         [console_scripts]
         fuzz=fuzz.__main__:cli
+        _fuzz=fuzz._fuzz:cli
     '''
 )
