@@ -62,7 +62,7 @@ To get help on a specific command (`train`, `merge`, or `parallel_merge`) use:
 There are two steps involved in using `fuzz`:
 
 1.  `train` a model that can be used to predict whether two rows refer to the same entity, and
-2.  `merge` two CSV files using the fitted model from step 1.[^1]
+2.  `merge` two CSV files using the fitted model from step 1. If speed is a concern and you're working on a high performance computing cluster with Slurm, consider using `parallel_merge` instead of `merge`.
 
 Let's train a model using the restaurant data (this will create a new file called `my.settings` that describes the [fitted model](https://dedupe.readthedocs.io/en/latest/API-documentation.html#staticgazetteer-objects)):
 
@@ -100,5 +100,3 @@ I've found the following commands useful for extracting a random sample of a lar
     tail -n +2 big.csv | shuf -n 10000 >> sample.csv
 
 This was particularly useful for training on large files. Note that `shuf` does read the entire file into memory.
-
-[^1]: If speed is a concern and you're working on high performance computing cluster with Slurm then use `parallel_merge` instead of `merge`.
