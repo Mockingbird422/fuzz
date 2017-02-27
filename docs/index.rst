@@ -1,7 +1,7 @@
 fuzz
 ====
 
-fuzz is a Python library designed to make fuzzy merges of large CSV
+fuzz is a Python package designed to make fuzzy merges of large CSV
 files easy.
 
 Motivation
@@ -20,7 +20,7 @@ Why use fuzz instead of `csvdedupe <https://github.com/datamade/csvdedupe>`_?
 Installation
 ------------
 
-This repository can be installed via pip::
+This package can be installed via pip::
 
     pip install git+https://github.com/amarder/fuzz.git
 
@@ -91,10 +91,13 @@ This will create a new file called `yourresults.csv` that has one row for each m
 Odyssey
 =======
 
-Install fuzz
+A big reason why I developed this package was to leverage the computational power on Harvard's Odyssey cluster. This section describes how I would use fuzz on Odyssey. There are many other workflows one could follow. If you run into issues, it might make sense to consult the `Odyssey Quick Start Guide <https://rc.fas.harvard.edu/resources/odyssey-quickstart-guide/>`_ or the `Resources <https://rc.fas.harvard.edu/resources/>`_ page.
+
+Installation
 ------------
 
-Installing this package on Odyssey is a little harder. Here are the steps I used to install it in a virtual environment:
+Unfortunately, installing this package on Odyssey is a little harder
+than on one's local machine. Here are the steps I used to install it in a virtual environment:
 
 1.  Create a new virtual environment using conda::
 
@@ -112,6 +115,39 @@ Installing this package on Odyssey is a little harder. Here are the steps I used
 4.  Use pip to install fuzz::
 
         pip install git+https://github.com/amarder/fuzz.git
+
+Usage
+-----
+
+Here's how I would fuzzy merge two CSV files on Odyssey:
+
+1.  Make sure that you've activated your virtual environment::
+
+        which fuzz
+
+2.  Train your model on a back-end node::
+
+        srun --pty --mem 4000 -p hbs_rcs -t 0-8:00 -n 1 -N 1 \
+        fuzz train \
+            --clean-path banks.csv \
+            --messy-path mortgages.csv \
+            --fields-file yourfields.json \
+            --training-file yourtraining.json \
+            --settings-file your.settings
+
+3.  Use the `parallel_merge` command to run your fuzzy merge on back-end nodes::
+
+        fuzz parallel_merge \
+            --settings-file your.settings \
+            --messy-path mortgages.csv \
+            --output-file yourresults.csv
+
+    This command submits three jobs to Slurm: (1) it creates an index
+    file describing the large CSV file mortgages.csv, (2) it submits a
+    job array so that blocks of the large CSV file can be matched with
+    the clean CSV file in parallel, and (3) it combines the merged
+    blocks together into a single output file. When you run this
+    command you will see the `sbatch` commands it issues to Slurm.
 
 
 Frequently asked questions
