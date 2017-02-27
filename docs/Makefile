@@ -20,4 +20,5 @@ help:
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 deploy: html
+	touch _build/html/.nojekyll
 	GIT_DEPLOY_DIR=_build/html/ ./deploy.sh
