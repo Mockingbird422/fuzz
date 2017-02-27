@@ -3,3 +3,4 @@
 /dist/
 /fuzz.egg-info/
 /.coverage
+/docs/_build/
