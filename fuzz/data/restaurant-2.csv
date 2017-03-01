@@ -3,7 +3,7 @@ name,address,city,cuisine,unique_id
 "art's delicatessen", "12224 ventura blvd.", "studio city", "american",1
 "hotel bel-air", "701 stone canyon rd.", "bel air", "californian",2
 "cafe bizou", "14016 ventura blvd.", "sherman oaks", "french",3
-"campanile", "624 s. la brea ave.", "los angeles", "american",4
+"campanile", "624 s. la brea ave.", "los angeles", "american",4,
 "chinois on main", "2709 main st.", "santa monica", "french",5
 "citrus", "6703 melrose ave.", "los angeles", "californian",6
 "fenix", "8358 sunset blvd. west", "hollywood", "american",7

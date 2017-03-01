@@ -1,4 +1,3 @@
-from tqdm import tqdm
 import click
 import csv
 import dedupe
@@ -17,7 +16,8 @@ def get_path(*args):
 # https://github.com/datamade/dedupe/blob/master/tests/exampleIO.py#L5-L11
 def _clean(s):
     result = re.sub('\n', ' ', s)
-    result = re.sub(r'[^\x00-\x7F]','?', result) # remove non-ascii characters
+    # remove non-ascii characters
+    result = re.sub(r'[^\x00-\x7F]', '?', result)
     result = re.sub('  +', ' ', result)
     result = result.strip().strip('"').strip("'").lower()
     if not result:
@@ -25,12 +25,26 @@ def _clean(s):
     return result
 
 
-def read_csv(path, first_row_number=None, offset=None, nrows=None, encoding='utf-8'):
-    assert (first_row_number is None and offset is None and nrows is None) or \
-        (first_row_number is not None and offset is not None and nrows is not None)
+def read_csv(path, first_row_number=None, offset=None, nrows=None,
+             encoding='utf-8'):
+    assert (
+        first_row_number is None and
+        offset is None and
+        nrows is None
+    ) or (
+        first_row_number is not None and
+        offset is not None and
+        nrows is not None
+    )
 
     read_whole_file = first_row_number is None
-    clean_row = lambda x: {k : _clean(v.decode(encoding)) for (k, v) in x.iteritems()}
+
+    clean_row = lambda x: {
+        k: _clean(v.decode(encoding))
+        for (k, v) in
+        x.iteritems()
+        if v != ['']  # remove entries caused by a trailing comma
+    }
 
     with open(path) as f:
         reader = csv.DictReader(f)
@@ -39,11 +53,10 @@ def read_csv(path, first_row_number=None, offset=None, nrows=None, encoding='utf
             for i, row in enumerate(reader):
                 yield i + 1, clean_row(row)
         else:
-            # initialize the headers
-            first_row = reader.next()
-            # reposition the reader
-            f.seek(offset)
+            reader.next()   # initialize the headers
+            f.seek(offset)  # reposition the reader
             for i, row in enumerate(reader):
+                print row
                 yield first_row_number + i, clean_row(row)
                 if i == nrows - 1:
                     break
@@ -66,7 +79,9 @@ def read(*args, **kwargs):
 @click.option('--sample-size', default=10000)
 @click.option('--settings-file', default='my.settings')
 @click.option('--interactive/--not-interactive', default=True)
-def train(clean_path, messy_path, training_file, logger_level, num_cores, fields_file, sample_size, settings_file, interactive):
+def train(clean_path, messy_path, training_file, logger_level,
+          num_cores, fields_file, sample_size, settings_file,
+          interactive):
     # Set logger level
     log_level = getattr(logging, logger_level)
     logging.getLogger().setLevel(log_level)
