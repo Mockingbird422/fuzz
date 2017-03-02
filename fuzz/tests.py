@@ -107,7 +107,7 @@ def test_companies():
         'fields_file': 'fields.json',
         'training_file': 'training.json',
     }
-    paths = {k: _relpath('data', 'companies2', v) for k, v in filenames.items()}
+    paths = {k: _relpath('data', 'companies', v) for k, v in filenames.items()}
     functions.train(**paths)
     assert os.path.exists('my.settings')
     os.remove('my.settings')
