@@ -1,6 +1,0 @@
-[
-    {"field": "name", "type": "String"},
-    {"field": "address", "type": "String"},
-    {"field": "cuisine", "type": "String"},
-    {"field": "city", "type": "String"}
-]
