@@ -99,3 +99,18 @@ def test_nrows():
     number_of_rows = nrows(FILE)
     number_of_lines = nlines(FILE)
     assert number_of_rows == number_of_lines - 1, locals()
+
+
+def test_companies():
+    filenames = {
+        'clean': 'names_2000.csv',
+        'messy': 'orbis_2000_small.csv',
+        'fields': 'fields.json',
+    }
+    paths = {k: _relpath('data', 'companies', v) for k, v in filenames.items()}
+    train_arguments = '''
+        --clean-path %(clean)s
+        --messy-path %(messy)s
+        --fields-file %(fields)s
+    ''' % paths
+    run(train, train_arguments)
