@@ -1,12 +1,10 @@
 from click.testing import CliRunner
 # This is the second line of the file.
 import shlex
-from merge import main as merge
-from train import train
+from __main__ import train, merge, parallel_merge
 import os
 import subprocess
 from index import line_offsets, nrows
-from parallel_merge import parallel_merge
 
 
 FILE = __file__[:-1] if __file__.endswith('.pyc') else __file__
