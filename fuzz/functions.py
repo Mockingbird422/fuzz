@@ -55,7 +55,7 @@ def read_csv(path, first_row_number=None, offset=None, nrows=None,
         k: _clean(v.decode(encoding))
         for (k, v) in
         x.iteritems()
-        if v != ['']  # remove entries caused by a trailing comma
+        if k is not None  # remove entries that have no header
     }
 
     with open(path) as f:
@@ -68,7 +68,6 @@ def read_csv(path, first_row_number=None, offset=None, nrows=None,
             reader.next()   # initialize the headers
             f.seek(offset)  # reposition the reader
             for i, row in enumerate(reader):
-                print row
                 yield first_row_number + i, clean_row(row)
                 if i == nrows - 1:
                     break
