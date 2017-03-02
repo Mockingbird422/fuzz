@@ -1,4 +1,4 @@
-from merge import merge
+from functions import merge
 from index import CsvFile
 import click
 

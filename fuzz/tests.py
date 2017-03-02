@@ -5,6 +5,7 @@ from __main__ import train, merge, parallel_merge
 import os
 import subprocess
 from index import line_offsets, nrows
+import functions
 
 
 FILE = __file__[:-1] if __file__.endswith('.pyc') else __file__
@@ -101,14 +102,9 @@ def test_nrows():
 
 def test_companies():
     filenames = {
-        'clean': 'names_2000.csv',
-        'messy': 'orbis_2000_small.csv',
-        'fields': 'fields.json',
+        'clean_path': 'names_2000.csv',
+        'messy_path': 'orbis_2001_small.csv',
+        'fields_file': 'fields.json',
     }
     paths = {k: _relpath('data', 'companies', v) for k, v in filenames.items()}
-    train_arguments = '''
-        --clean-path %(clean)s
-        --messy-path %(messy)s
-        --fields-file %(fields)s
-    ''' % paths
-    run(train, train_arguments)
+    functions.train(**paths)

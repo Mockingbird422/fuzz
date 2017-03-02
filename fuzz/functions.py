@@ -10,14 +10,19 @@ import subprocess
 import time
 
 
-############
-# Training #
-############
+def _set_logger_level():
+    log_level = os.environ.get('LOGGER_LEVEL', 'WARNING')
+    logging.getLogger().setLevel(log_level)
 
 
 def get_path(*args):
     relpath = os.path.join(*args)
     return pkg_resources.resource_filename('fuzz', relpath)
+
+
+############
+# Training #
+############
 
 
 # https://github.com/datamade/dedupe/blob/master/tests/exampleIO.py#L5-L11
@@ -74,12 +79,10 @@ def read(*args, **kwargs):
     return {i: row for i, row in enum_rows}
 
 
-def train(clean_path, messy_path, training_file, logger_level,
-          num_cores, fields_file, sample_size, settings_file,
-          interactive):
-    # Set logger level
-    log_level = getattr(logging, logger_level)
-    logging.getLogger().setLevel(log_level)
+def train(clean_path, messy_path, fields_file,
+          training_file='training.json', settings_file='my.settings',
+          sample_size=10000, num_cores=1, interactive=False):
+    _set_logger_level()
 
     logging.info('Reading data ...')
     clean = read(clean_path)
@@ -123,9 +126,7 @@ def train(clean_path, messy_path, training_file, logger_level,
 
 def merge(messy_path, settings_file, output_file, first_row_number,
           offset, nrows):
-    # Set logger level
-    log_level = os.environ.get('LOGGER_LEVEL', 'WARNING')
-    logging.getLogger().setLevel(log_level)
+    _set_logger_level()
 
     logging.info('Initializing gazetteer ...')
     with open(settings_file) as f:

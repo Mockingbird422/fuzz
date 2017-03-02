@@ -7,7 +7,6 @@ from functions import get_path
 @click.option('--clean-path', default=get_path('data', 'restaurant-1.csv'))
 @click.option('--messy-path', default=get_path('data', 'restaurant-2.csv'))
 @click.option('--training-file', default=get_path('data', 'training.json'))
-@click.option('--logger-level', default='WARNING')
 # TODO: If we use Anaconda then multiprocessing will not work because
 # Anaconda uses MKL: https://github.com/datamade/dedupe/issues/499
 @click.option('--num-cores', default=1)
@@ -40,6 +39,10 @@ def parallel_merge(*args, **kwargs):
     functions.parallel_merge(*args, **kwargs)
 
 
+# @click.option('--logger-level', default='WARNING')
+# TODO: Set logger level
+# log_level = getattr(logging, logger_level)
+# logging.getLogger().setLevel(log_level)
 cli = click.Group(commands={
     'train': train,
     'merge': merge,
