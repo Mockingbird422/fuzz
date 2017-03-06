@@ -1,6 +1,6 @@
 import click
 import os
-from index import CsvFile
+from .index import CsvFile
 
 
 @click.command()

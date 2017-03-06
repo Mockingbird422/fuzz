@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import unicode_literals
 from tqdm import tqdm
 import csv
 import dedupe
@@ -52,9 +54,9 @@ def read_csv(path, first_row_number=None, offset=None, nrows=None,
     read_whole_file = first_row_number is None
 
     clean_row = lambda x: {
-        k: _clean(v.decode(encoding))
+        k: _clean(v)
         for (k, v) in
-        x.iteritems()
+        x.items()
         if k is not None  # remove entries that have no header
     }
 
@@ -65,7 +67,7 @@ def read_csv(path, first_row_number=None, offset=None, nrows=None,
             for i, row in enumerate(reader):
                 yield i + 1, clean_row(row)
         else:
-            reader.next()   # initialize the headers
+            next(reader)   # initialize the headers
             f.seek(offset)  # reposition the reader
             for i, row in enumerate(reader):
                 yield first_row_number + i, clean_row(row)
@@ -128,7 +130,7 @@ def merge(messy_path, settings_file, output_file, first_row_number,
     _set_logger_level()
 
     logging.info('Initializing gazetteer ...')
-    with open(settings_file) as f:
+    with open(settings_file, 'rb') as f:
         gazetteer = dedupe.StaticGazetteer(f, num_cores=1)
 
     rows = read_csv(
@@ -200,7 +202,7 @@ class Slurm(object):
     ])
 
     def _call(self, command):
-        print command
+        print(command)
         output = subprocess.check_output(command, shell=True)
         m = re.search('^Submitted batch job (\d+)$', output)
         assert m, output
@@ -254,7 +256,7 @@ class Serial(Slurm):
     ])
 
     def _call(self, command):
-        print command
+        print(command)
         output = subprocess.check_output(command, shell=True)
         return output
 
