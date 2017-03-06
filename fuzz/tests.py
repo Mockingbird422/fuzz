@@ -1,11 +1,13 @@
-from click.testing import CliRunner
+from __future__ import print_function
 # This is the second line of the file.
+from __future__ import unicode_literals
+from click.testing import CliRunner
 import shlex
-from __main__ import train, merge, parallel_merge
+from .__main__ import train, merge, parallel_merge
 import os
 import subprocess
-from index import line_offsets, nrows
-import functions
+from .index import line_offsets, nrows
+from . import functions
 
 
 FILE = __file__[:-1] if __file__.endswith('.pyc') else __file__
@@ -45,7 +47,7 @@ def test_example(clean=True):
         --settings-file %(settings)s
         --not-interactive
     ''' % paths
-    print run(train, arguments)
+    print(run(train, arguments))
     assert os.path.exists(paths['settings'])
 
     ########################
@@ -56,7 +58,7 @@ def test_example(clean=True):
         --settings-file %(settings)s
         --output-file %(output)s
     ''' % paths
-    print run(merge, arguments)
+    print(run(merge, arguments))
     assert os.path.exists(paths['output'])
 
     ##########################
@@ -85,12 +87,13 @@ def test_line_offsets():
     with open(FILE) as f:
         f.seek(offsets[1])
         line = next(f)
-        assert line == "# This is the second line of the file.\n"
+        assert line == "# This is the second line of the file.\n", line
 
 
 def nlines(path):
     cmd = 'wc -l %s' % path
     output = subprocess.check_output(cmd, shell=True)
+    output = output.decode('ascii')
     return int(output.split(' ')[0])
 
 

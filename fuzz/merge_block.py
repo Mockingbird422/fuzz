@@ -1,5 +1,5 @@
-from functions import merge
-from index import CsvFile
+from .functions import merge
+from .index import CsvFile
 import click
 
 

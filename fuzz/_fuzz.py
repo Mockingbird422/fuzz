@@ -1,8 +1,8 @@
 import click
 # subcommands
-from index import index
-from merge_block import merge_block
-from combine import combine
+from .index import index
+from .merge_block import merge_block
+from .combine import combine
 
 cli = click.Group(commands={
     'index': index,

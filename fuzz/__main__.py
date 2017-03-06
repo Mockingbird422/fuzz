@@ -1,6 +1,6 @@
 import click
-import functions
-from functions import get_path
+from . import functions
+from .functions import get_path
 
 
 @click.command()

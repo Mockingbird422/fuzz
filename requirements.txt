@@ -21,7 +21,6 @@ numpy==1.12.0             # via canonicalize, categorical-distance, dedupe-hclus
 persistent==4.2.2         # via btrees, zope.index
 pyhacrf-datamade==0.2.0   # via highered
 pylbfgs==0.2.0.3          # via pyhacrf-datamade, rlr
-pyparsing==2.1.10         # via packaging
 rlr==2.4.1                # via dedupe
 simplecosine==1.1         # via dedupe
 simplejson==3.10.0        # via dedupe
