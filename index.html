@@ -1,0 +1,276 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>fuzz &#8212; fuzz 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="fuzz">
+<h1>fuzz<a class="headerlink" href="#fuzz" title="Permalink to this headline">¶</a></h1>
+<p>fuzz is a Python package designed to make fuzzy merges of large CSV
+files easy.</p>
+<div class="section" id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Permalink to this headline">¶</a></h2>
+<p>Why use fuzz instead of <a class="reference external" href="https://github.com/datamade/csvdedupe">csvdedupe</a>?</p>
+<ul class="simple">
+<li>fuzz uses less memory.</li>
+<li>fuzz supports parallel computation via <a class="reference external" href="https://slurm.schedmd.com/">Slurm</a>. This is convenient if you&#8217;re
+working on Harvard&#8217;s <a class="reference external" href="https://rc.fas.harvard.edu/odyssey/">Odyssey</a> cluster.</li>
+<li>fuzz separates the training and merge steps. Use the <cite>train</cite> command to fit your model. Use the <cite>merge</cite> command to merge your two datasets using a previously fitted model. This is helpful if training takes a long time.</li>
+</ul>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>This package can be installed via pip:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">git</span><span class="o">+</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">amarder</span><span class="o">/</span><span class="n">fuzz</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="getting-help">
+<h2>Getting help<a class="headerlink" href="#getting-help" title="Permalink to this headline">¶</a></h2>
+<p>I&#8217;ve tried to include the most important documentation as part of the command line tool so it&#8217;s easy to get help. To see a list of the available fuzz commands use:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fuzz</span> <span class="o">--</span><span class="n">help</span>
+</pre></div>
+</div>
+<p>To get help on a specific command (<cite>train</cite>, <cite>merge</cite>, or <cite>parallel_merge</cite>) use:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fuzz</span> <span class="n">train</span> <span class="o">--</span><span class="n">help</span>
+<span class="n">fuzz</span> <span class="n">merge</span> <span class="o">--</span><span class="n">help</span>
+<span class="n">fuzz</span> <span class="n">parallel_merge</span> <span class="o">--</span><span class="n">help</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="a-simple-example">
+<h2>A simple example<a class="headerlink" href="#a-simple-example" title="Permalink to this headline">¶</a></h2>
+<p>fuzz ships with four example files:</p>
+<ol class="arabic simple">
+<li><strong>restaurant-1.csv</strong> a CSV file containing 112 restaurant addresses. This is a table of clean data (each row is a unique restaurant).</li>
+<li><strong>restaurant-2.csv</strong> a CSV file containing 752 restaurant addresses. This is a table of messy data (multiple rows may refer to the same restaurant).</li>
+<li><strong>fields.json</strong> a JSON file describing what columns we want to merge by.</li>
+<li><strong>training.json</strong> a JSON file with ten pairs of addresses from the two CSV files that match (after inspecting the two addresses I determined they referred to the same restaurant), and eleven pairs of addresses that don&#8217;t match (they refer to two different restaurants).</li>
+</ol>
+<p>There are two steps involved in using fuzz:</p>
+<ol class="arabic simple">
+<li><cite>train</cite> a model that can be used to predict whether two rows refer to the same entity, and</li>
+<li><cite>merge</cite> two CSV files using the fitted model from step 1. If speed is a concern and you&#8217;re working on a high performance computing cluster with Slurm, consider using <cite>parallel_merge</cite> instead of <cite>merge</cite>.</li>
+</ol>
+<p>Let&#8217;s train a model using the restaurant data (this will create a new
+file called <cite>my.settings</cite> that describes the <a class="reference external" href="https://dedupe.readthedocs.io/en/latest/API-documentation.html#staticgazetteer-objects">fitted model</a>):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fuzz</span> <span class="n">train</span>
+</pre></div>
+</div>
+<p>Now let&#8217;s merge the restaurant data (this will create a new file called <cite>output.csv</cite> that describes the fuzzy matches):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fuzz</span> <span class="n">merge</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="a-more-realistic-example">
+<h2>A more realistic example<a class="headerlink" href="#a-more-realistic-example" title="Permalink to this headline">¶</a></h2>
+<p>Imagine you have a CSV file describing a bunch of mortgages and a CSV files describing all the banks in the US. Unfortunately, the mortgage data is messy and you want to link each mortgage up to the right bank. Here&#8217;s how you would train your model:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fuzz</span> <span class="n">train</span> \
+    <span class="o">--</span><span class="n">clean</span><span class="o">-</span><span class="n">path</span> <span class="n">banks</span><span class="o">.</span><span class="n">csv</span> \
+    <span class="o">--</span><span class="n">messy</span><span class="o">-</span><span class="n">path</span> <span class="n">mortgages</span><span class="o">.</span><span class="n">csv</span> \
+    <span class="o">--</span><span class="n">fields</span><span class="o">-</span><span class="n">file</span> <span class="n">yourfields</span><span class="o">.</span><span class="n">json</span> \
+    <span class="o">--</span><span class="n">training</span><span class="o">-</span><span class="n">file</span> <span class="n">yourtraining</span><span class="o">.</span><span class="n">json</span> \
+    <span class="o">--</span><span class="n">settings</span><span class="o">-</span><span class="n">file</span> <span class="n">your</span><span class="o">.</span><span class="n">settings</span>
+</pre></div>
+</div>
+<p>The training file does not need to exist (you will interactively
+construct the training file marking which mortgage-bank pairs match),
+but you do need to set up the fields file. For a description of what
+needs to be in your fields file see <a class="reference external" href="http://dedupe.readthedocs.io/en/latest/Variable-definition.html">this page</a>
+describing how to define variables for <a class="reference external" href="http://dedupe.readthedocs.io/en/latest/index.html">dedupe</a>. After you have trained your model this will create a new file called <cite>your.settings</cite> that describes the fitted model, now you&#8217;re ready to merge:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fuzz</span> <span class="n">merge</span> \
+    <span class="o">--</span><span class="n">settings</span><span class="o">-</span><span class="n">file</span> <span class="n">your</span><span class="o">.</span><span class="n">settings</span> \
+    <span class="o">--</span><span class="n">messy</span><span class="o">-</span><span class="n">path</span> <span class="n">mortgages</span><span class="o">.</span><span class="n">csv</span> \
+    <span class="o">--</span><span class="n">output</span><span class="o">-</span><span class="n">file</span> <span class="n">yourresults</span><span class="o">.</span><span class="n">csv</span>
+</pre></div>
+</div>
+<p>This will create a new file called <cite>yourresults.csv</cite> that has one row for each mortgage. Each row will have the row number associated with the mortgage, the row number associated with the bank that most closely matches the information from that mortgage, and a probability estimate of how confident the model is that this is a correct match.</p>
+</div>
+</div>
+<div class="section" id="id1">
+<h1>Odyssey<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<p>A big reason why I developed this package was to leverage the computational power on Harvard&#8217;s Odyssey cluster. This section describes how I would use fuzz on Odyssey. There are many other workflows one could follow. If you run into issues, it might make sense to consult the <a class="reference external" href="https://rc.fas.harvard.edu/resources/odyssey-quickstart-guide/">Odyssey Quick Start Guide</a> or the <a class="reference external" href="https://rc.fas.harvard.edu/resources/">Resources</a> page.</p>
+<div class="section" id="id2">
+<h2>Installation<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>Unfortunately, installing this package on Odyssey is a little harder
+than on one&#8217;s local machine. Here are the steps I used to install it in a virtual environment:</p>
+<ol class="arabic">
+<li><p class="first">Create a new virtual environment using conda:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">module</span> <span class="n">load</span> <span class="n">Anaconda</span>
+<span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">myenv</span> <span class="n">python</span> <span class="o">--</span><span class="n">yes</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Activate the environment:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="n">activate</span> <span class="n">myenv</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Install pip:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="n">pip</span> <span class="o">--</span><span class="n">yes</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Use pip to install fuzz:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">git</span><span class="o">+</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">amarder</span><span class="o">/</span><span class="n">fuzz</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>Here&#8217;s how I would fuzzy merge two CSV files on Odyssey:</p>
+<ol class="arabic">
+<li><p class="first">Make sure that you&#8217;ve activated your virtual environment:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">which</span> <span class="n">fuzz</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Train your model on a back-end node:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">srun</span> <span class="o">--</span><span class="n">pty</span> <span class="o">--</span><span class="n">mem</span> <span class="mi">4000</span> <span class="o">-</span><span class="n">p</span> <span class="n">hbs_rcs</span> <span class="o">-</span><span class="n">t</span> <span class="mi">0</span><span class="o">-</span><span class="mi">8</span><span class="p">:</span><span class="mi">00</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="o">-</span><span class="n">N</span> <span class="mi">1</span> \
+<span class="n">fuzz</span> <span class="n">train</span> \
+    <span class="o">--</span><span class="n">clean</span><span class="o">-</span><span class="n">path</span> <span class="n">banks</span><span class="o">.</span><span class="n">csv</span> \
+    <span class="o">--</span><span class="n">messy</span><span class="o">-</span><span class="n">path</span> <span class="n">mortgages</span><span class="o">.</span><span class="n">csv</span> \
+    <span class="o">--</span><span class="n">fields</span><span class="o">-</span><span class="n">file</span> <span class="n">yourfields</span><span class="o">.</span><span class="n">json</span> \
+    <span class="o">--</span><span class="n">training</span><span class="o">-</span><span class="n">file</span> <span class="n">yourtraining</span><span class="o">.</span><span class="n">json</span> \
+    <span class="o">--</span><span class="n">settings</span><span class="o">-</span><span class="n">file</span> <span class="n">your</span><span class="o">.</span><span class="n">settings</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Use the <cite>parallel_merge</cite> command to run your fuzzy merge on back-end nodes:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fuzz</span> <span class="n">parallel_merge</span> \
+    <span class="o">--</span><span class="n">settings</span><span class="o">-</span><span class="n">file</span> <span class="n">your</span><span class="o">.</span><span class="n">settings</span> \
+    <span class="o">--</span><span class="n">messy</span><span class="o">-</span><span class="n">path</span> <span class="n">mortgages</span><span class="o">.</span><span class="n">csv</span> \
+    <span class="o">--</span><span class="n">output</span><span class="o">-</span><span class="n">file</span> <span class="n">yourresults</span><span class="o">.</span><span class="n">csv</span>
+</pre></div>
+</div>
+<p>This command submits three jobs to Slurm: (1) it creates an index
+file describing the large CSV file mortgages.csv, (2) it submits a
+job array so that blocks of the large CSV file can be matched with
+the clean CSV file in parallel, and (3) it combines the merged
+blocks together into a single output file. When you run this
+command you will see the <cite>sbatch</cite> commands it issues to Slurm.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="section" id="frequently-asked-questions">
+<h1>Frequently asked questions<a class="headerlink" href="#frequently-asked-questions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="constructing-a-random-sample">
+<h2>Constructing a random sample<a class="headerlink" href="#constructing-a-random-sample" title="Permalink to this headline">¶</a></h2>
+<p>I&#8217;ve found the following commands useful for extracting a random sample of a large CSV file:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">head</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1</span> <span class="n">big</span><span class="o">.</span><span class="n">csv</span> <span class="o">&gt;</span> <span class="n">sample</span><span class="o">.</span><span class="n">csv</span>
+<span class="n">tail</span> <span class="o">-</span><span class="n">n</span> <span class="o">+</span><span class="mi">2</span> <span class="n">big</span><span class="o">.</span><span class="n">csv</span> <span class="o">|</span> <span class="n">shuf</span> <span class="o">-</span><span class="n">n</span> <span class="mi">10000</span> <span class="o">&gt;&gt;</span> <span class="n">sample</span><span class="o">.</span><span class="n">csv</span>
+</pre></div>
+</div>
+<p>This was particularly useful for training on large files. Note that <cite>shuf</cite> does read the entire file into memory.</p>
+</div>
+</div>
+<div class="section" id="module-fuzz.functions">
+<span id="api"></span><h1>API<a class="headerlink" href="#module-fuzz.functions" title="Permalink to this headline">¶</a></h1>
+<p>Functions for performing fuzzy merges.</p>
+<dl class="function">
+<dt id="fuzz.functions.train">
+<code class="descclassname">fuzz.functions.</code><code class="descname">train</code><span class="sig-paren">(</span><em>clean_path</em>, <em>messy_path</em>, <em>fields_file</em>, <em>training_file=u'training.json'</em>, <em>settings_file=u'my.settings'</em>, <em>sample_size=10000</em>, <em>num_cores=1</em>, <em>interactive=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fuzz/functions.html#train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fuzz.functions.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Train a model to perform a fuzzy merge.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fuzz.functions.merge">
+<code class="descclassname">fuzz.functions.</code><code class="descname">merge</code><span class="sig-paren">(</span><em>messy_path</em>, <em>settings_file</em>, <em>output_file</em>, <em>first_row_number</em>, <em>offset</em>, <em>nrows</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fuzz/functions.html#merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fuzz.functions.merge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a fuzzy merge.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fuzz.functions.parallel_merge">
+<code class="descclassname">fuzz.functions.</code><code class="descname">parallel_merge</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fuzz/functions.html#parallel_merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fuzz.functions.parallel_merge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a fuzzy merge in parallel.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">fuzz</a><ul>
+<li><a class="reference internal" href="#motivation">Motivation</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#getting-help">Getting help</a></li>
+<li><a class="reference internal" href="#a-simple-example">A simple example</a></li>
+<li><a class="reference internal" href="#a-more-realistic-example">A more realistic example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id1">Odyssey</a><ul>
+<li><a class="reference internal" href="#id2">Installation</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#frequently-asked-questions">Frequently asked questions</a><ul>
+<li><a class="reference internal" href="#constructing-a-random-sample">Constructing a random sample</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-fuzz.functions">API</a></li>
+</ul>
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Andrew Marder.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
