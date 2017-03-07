@@ -18,7 +18,3 @@ help:
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-
-deploy: html
-	touch _build/html/.nojekyll
-	GIT_DEPLOY_DIR=_build/html/ ./deploy.sh

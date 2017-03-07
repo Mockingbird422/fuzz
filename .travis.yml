@@ -17,8 +17,13 @@ install:
 script:
   - nosetests
   - coveralls
-  - cd docs; make html; cd ..
+  # Use Sphinx to make the documentation
+  - cd docs
+  - make html
+  - touch _build/html/.nojekyll
+  - cd ..
 
+# Deploy the documentation to GitHub Pages
 deploy:
   provider: pages
   skip_cleanup: true
