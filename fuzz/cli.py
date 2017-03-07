@@ -1,6 +1,7 @@
-import click
 from . import functions
+from . import internal
 from .functions import get_path
+import click
 
 
 @click.command()
@@ -43,11 +44,14 @@ def parallel_merge(*args, **kwargs):
 # TODO: Set logger level
 # log_level = getattr(logging, logger_level)
 # logging.getLogger().setLevel(log_level)
-cli = click.Group(commands={
+public = click.Group(commands={
     'train': train,
     'merge': merge,
     'parallel_merge': parallel_merge,
 })
 
-if __name__ == '__main__':
-    cli()
+private = click.Group(commands={
+    'index': internal.index,
+    'merge_block': internal.merge_block,
+    'combine': internal.combine,
+})

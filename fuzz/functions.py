@@ -1,3 +1,7 @@
+'''
+Functions for performing fuzzy merges.
+'''
+
 from __future__ import print_function
 from __future__ import unicode_literals
 from tqdm import tqdm
@@ -83,6 +87,9 @@ def read(*args, **kwargs):
 def train(clean_path, messy_path, fields_file,
           training_file='training.json', settings_file='my.settings',
           sample_size=10000, num_cores=1, interactive=False):
+    '''
+    Train a model to perform a fuzzy merge.
+    '''
     _set_logger_level()
 
     logging.info('Reading data ...')
@@ -127,6 +134,9 @@ def train(clean_path, messy_path, fields_file,
 
 def merge(messy_path, settings_file, output_file, first_row_number,
           offset, nrows):
+    '''
+    Perform a fuzzy merge.
+    '''
     _set_logger_level()
 
     logging.info('Initializing gazetteer ...')
@@ -283,5 +293,8 @@ class Serial(Slurm):
 
 
 def parallel_merge(*args, **kwargs):
+    '''
+    Perform a fuzzy merge in parallel.
+    '''
     s = Slurm() if _slurm_available() else Serial()
     s.merge(*args, **kwargs)

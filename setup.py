@@ -20,7 +20,7 @@ setup(
     install_requires=get_requirements(),
     entry_points='''
         [console_scripts]
-        fuzz=fuzz.__main__:cli
-        _fuzz=fuzz._fuzz:cli
+        fuzz=fuzz.cli:public
+        _fuzz=fuzz.cli:private
     '''
 )

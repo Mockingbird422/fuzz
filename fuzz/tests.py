@@ -3,10 +3,10 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from click.testing import CliRunner
 import shlex
-from .__main__ import train, merge, parallel_merge
+from .cli import train, merge, parallel_merge
 import os
 import subprocess
-from .index import line_offsets, nrows
+from .internal import line_offsets, nrows
 from . import functions
 
 
