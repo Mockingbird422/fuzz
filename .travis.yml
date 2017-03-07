@@ -4,12 +4,25 @@ python:
   - "2.7"
   - "3.6"
 
+env:
+  global:
+    - secure: "Ono9Cj6FKLWiI1Yzowhboftbj6sH9JHf9jCmo1tzjXPNbcKWafxCzLALoCdByT9sGivMtbQu901TMzP/SdprDzXzHBwn2Ws8r5LML/48JSJUQcLd+ZKU82lFeHctRT6LJb40F4+Si04gCD9fHTBThP859N6gQsB8pHo04bcyulobLZLnsxPI/jrb+m86bIHjMmKvqLm48q9O2RIqHECMzg1MSPe0NpG6piwuOgZYPhNoy4bMJryhZJ/tPz/qv9ryFUZYoeRXprAf9iOUGIAH7PS7rzxMlt3elkrE1YpdtOcnLlNmJIxiXJebeSNFu/xVX8ddG2ISrtCyqCjcnwRS19ZX5UbZadz0DGpfUpZNaz27AWYIL0P5/Fa5tO4d4fKOULE3Va25QsXb3aFYlgsi0+MBuHK6IQeFe9XeP80+qtglIS15fR2Ca4fTz2e/TPLQ10AXgSsgZ2iN1k5lUbaOP6VT9uftChS/1QOoZnn8PHz07hou89v4ENp/ol9y2CAZAx1o28IzJMJi9KIkJqgJ3CnNxO4qnmoEXlZ+Qe2MrhUEArDE5fEqv3RYgHEYXXVXEhPgbQK+P72K2VwajB2ow41MizqExlO0xvrAxj1AkqWe1jctA8RqzSEElYAhT7dotAKeFAUZfKIZZRVHPTcdXYUrXnpWlqqMrBIbFxrbmxo="
+
 install:
   - pip install --upgrade pip setuptools
   - pip install numpy==1.12.0
   - python setup.py install
   - pip install -r dev-requirements.txt
 
-script: nosetests
+script:
+  - nosetests
+  - coveralls
+  - cd docs; make html; cd ..
 
-after_success: coveralls
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  on:
+    branch: master
+  local_dir: docs/_build/html/
