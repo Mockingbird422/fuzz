@@ -162,3 +162,10 @@ I've found the following commands useful for extracting a random sample of a lar
     tail -n +2 big.csv | shuf -n 10000 >> sample.csv
 
 This was particularly useful for training on large files. Note that `shuf` does read the entire file into memory.
+
+
+API
+===
+
+.. automodule:: fuzz.functions
+    :members: train, merge, parallel_merge
