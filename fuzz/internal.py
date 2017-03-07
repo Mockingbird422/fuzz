@@ -1,7 +1,9 @@
-import logging
+from .functions import merge
 import click
-import math
 import json
+import logging
+import math
+import os
 
 
 def nrows(csv_path):
@@ -67,5 +69,48 @@ def index(messy, nblocks, json_file):
         csv_file.dump(f)
 
 
-if __name__ == '__main__':
-    index()
+@click.command()
+@click.option('--settings', default='example/my.settings')
+@click.option('--json-file', default='example/index.json')
+@click.option('--block-id', default=1)
+def merge_block(settings, json_file, block_id):
+    csv_file = CsvFile()
+    with open(json_file) as f:
+        csv_file.load(f)
+
+    block = csv_file['blocks'][str(block_id)]
+
+    kwargs = {
+        'messy_path': csv_file['path'],
+        'settings_file': settings,
+        'output_file': '%d.csv' % block_id,
+        'first_row_number': block['first_row_number'],
+        'offset': block['offset'],
+        'nrows': csv_file['block_size'],
+    }
+    merge(**kwargs)
+
+
+@click.command()
+@click.option('--json-file', default='example/index.json')
+@click.option('--output', default='output.csv')
+def combine(json_file, output):
+    csv_file = CsvFile()
+    with open(json_file) as f:
+        csv_file.load(f)
+    with open(output, 'w') as outfile:
+        for i in range(1, csv_file['nblocks'] + 1):
+            path = '%d.csv' % i
+            with open(path) as infile:
+                for j, line in enumerate(infile):
+                    if j == 0:
+                        if i == 1:
+                            outfile.write(line)
+                    else:
+                        outfile.write(line)
+
+    # clean up
+    for i in range(1, csv_file['nblocks'] + 1):
+        path = '%d.csv' % i
+        os.remove(path)
+    os.remove(json_file)
